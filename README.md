@@ -15,7 +15,7 @@ auditable stages:
 
 ![Overview of the TRAJDEBUG pipeline](assets/%20pipeline.png)
 
-See [`detector/README.md`](detector/README.md) for implementation details and [`13209_TRAJDEBUG_Tracing_Error_.pdf`](13209_TRAJDEBUG_Tracing_Error_.pdf) for the paper.
+See [`detector/README.md`](detector/README.md) for implementation details and the [`paper`](main.pdf).
 
 ## Results
 
@@ -143,7 +143,7 @@ Open <http://localhost:8000>. See [`viewer/README.md`](viewer/README.md).
 
 ## Citation
 
-The paper is currently anonymous. Use [`CITATION.cff`](CITATION.cff), and update its authors and public repository URL after deanonymization.
+If you use TRAJDEBUG, please cite the paper. Author and repository metadata are provided in [`CITATION.cff`](CITATION.cff).
 
 ## License
 

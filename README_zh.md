@@ -14,7 +14,7 @@ TRAJDEBUG 先构建多粒度轨迹视图，再执行三个可审计阶段：
 
 ![TRAJDEBUG pipeline 总览](assets/%20pipeline.png)
 
-实现细节见 [`detector/README_zh.md`](detector/README_zh.md)，论文见 [`13209_TRAJDEBUG_Tracing_Error_.pdf`](13209_TRAJDEBUG_Tracing_Error_.pdf)。
+实现细节见 [`detector/README_zh.md`](detector/README_zh.md)，论文见 [`main.pdf`](main.pdf)。
 
 ## 结果
 
@@ -141,7 +141,7 @@ python -m viewer.server --dataset alfworld --output-dir outputs
 
 ## 引用
 
-论文目前匿名。请使用 [`CITATION.cff`](CITATION.cff)，并在论文解除匿名后更新作者与公开仓库地址。
+如果本项目对您的研究有帮助，请引用论文。作者与仓库元数据见 [`CITATION.cff`](CITATION.cff)。
 
 ## 许可证
 
