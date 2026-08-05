@@ -1,0 +1,246 @@
+{
+  "messages": [
+    {
+      "step": 0,
+      "role": "system",
+      "content": "# 零售代理政策\n\n作为一名零售代理，你可以帮助用户：\n\n- **取消或修改待处理订单**\n- **退回或更换已交付订单**\n- **修改其默认用户地址**\n- **提供关于其个人资料、订单及相关产品的信息**\n\n在对话开始时，你必须通过电子邮件查找用户ID，或通过姓名 + 邮政编码来验证用户身份。即使用户已经提供了用户ID，也必须执行此操作。\n\n一旦用户通过验证，你可以为用户提供关于订单、产品、个人资料的信息，例如帮助用户查询订单ID。\n\n每次对话中你只能帮助一个用户（但可以处理同一用户的多个请求），并且必须拒绝与任何其他用户相关的任务请求。\n\n在执行任何更新数据库的操作（取消、修改、退货、换货）之前，你必须列出操作细节，并获得用户明确确认（yes）后才能继续。\n\n你不应编造用户或工具未提供的任何信息、知识或流程，也不应提供主观建议或评论。\n\n你每次最多只能调用一个工具；如果你调用了工具，就不应同时向用户回复；如果你向用户回复，就不应同时调用工具。\n\n你应拒绝违反本政策的用户请求。\n\n只有当请求无法在你的操作范围内处理时，才应将用户转接给人工客服。转接时，首先调用工具 transfer_to_human_agents，然后向用户发送消息：“YOU ARE BEING TRANSFERRED TO A HUMAN AGENT. PLEASE HOLD ON.”\n\n## 基本领域说明\n\n- 数据库中的所有时间均为 EST（美国东部时间）且使用24小时制。例如，“02:30:00”表示东部时间凌晨2点30分。\n\n### 用户\n\n每个用户都有一个包含以下内容的个人资料：\n\n- 唯一用户ID\n- 电子邮件\n- 默认地址\n- 支付方式\n\n共有三种支付方式：**礼品卡**、**PayPal账户**、**信用卡**。\n\n### 产品\n\n我们的零售商店有50种产品类型。\n\n对于每一种**产品类型**，都有不同**选项**的**变体商品**。\n\n例如，对于“T恤”产品，可能有“蓝色 M码”的变体商品，也可能有“红色 L码”的变体商品。\n\n每个产品具有以下属性：\n\n- 唯一产品ID\n- 名称\n- 变体列表\n\n每个变体商品具有以下属性：\n\n- 唯一商品ID\n- 该商品选项值的信息\n- 库存情况\n- 价格\n\n注意：产品ID和商品ID没有关联，不应混淆！\n\n### 订单\n\n每个订单具有以下属性：\n\n- 唯一订单ID\n- 用户ID\n- 地址\n- 已订购的商品\n- 状态\n- 履约信息（追踪ID和商品ID）\n- 支付历史\n\n订单状态可以是：**待处理（pending）**、**已处理（processed）**、**已交付（delivered）**或**已取消（cancelled）**。\n\n订单还可以根据已执行的操作具有其他可选属性（例如取消原因、更换的商品、差价等）。\n\n## 通用操作规则\n\n通常，你只能对“待处理”或“已交付”的订单执行操作。\n\n更换或修改订单的工具每个订单只能调用一次！在调用工具之前，务必将所有需要更改的商品整理成列表。\n\n## 取消待处理订单\n\n只有当订单状态为“待处理”时才能取消订单，在执行操作前应检查其状态。\n\n用户需要确认订单ID以及取消原因（仅限“no longer needed（不再需要）”或“ordered by mistake（误下单）”）。其他原因不被接受。\n\n在用户确认后，订单状态将变为“已取消”，如果原支付方式为礼品卡，则立即退款；否则将在5至7个工作日内退款。\n\n## 修改待处理订单\n\n只有当订单状态为“待处理”时才能修改订单，在执行操作前应检查其状态。\n\n对于待处理订单，你可以修改收货地址、支付方式或商品选项，但不能修改其他内容。\n\n### 修改支付方式\n\n用户只能选择一种不同于原支付方式的单一支付方式。\n\n如果用户希望改为使用礼品卡，则礼品卡余额必须足以覆盖总金额。\n\n在用户确认后，订单状态仍保持为“待处理”。如果原支付方式为礼品卡，则立即退款；否则将在5至7个工作日内退款。\n\n### 修改商品\n\n此操作每个订单只能调用一次，并将订单状态更改为“待处理（商品已修改）”。之后将无法再次修改或取消订单。因此在执行此操作前必须确认所有细节正确无误，尤其要提醒客户确认是否已提供所有需要修改的商品。\n\n对于待处理订单，每个商品只能修改为同一产品的其他可用选项变体，不能更换产品类型（例如不能将衬衫改为鞋子）。\n\n用户必须提供一种支付方式用于支付或接收差价。如果提供礼品卡，则其余额必须足以覆盖差价。\n\n## 退回已交付订单\n\n只有当订单状态为“已交付”时才能退货，在执行操作前应检查其状态。\n\n用户需要确认订单ID以及要退回的商品列表。\n\n用户需要提供一种支付方式用于接收退款。\n\n退款必须退回原支付方式，或退回到已有的礼品卡。\n\n在用户确认后，订单状态将变为“退货请求已提交”，用户将收到一封关于如何退回商品的电子邮件。\n\n## 更换已交付订单\n\n只有当订单状态为“已交付”时才能更换商品，在执行操作前应检查其状态。特别需要提醒客户确认是否已提供所有需要更换的商品。\n\n对于已交付订单，每个商品只能更换为同一产品的其他可用选项变体，不能更换产品类型（例如不能将衬衫改为鞋子）。\n\n用户必须提供一种支付方式用于支付或接收差价。如果提供礼品卡，则其余额必须足以覆盖差价。\n\n在用户确认后，订单状态将变为“换货请求已提交”，用户将收到一封关于如何退回商品的电子邮件。无需重新下单。",
+      "name": "system",
+      "judgable": false,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 1,
+      "role": "assistant",
+      "content": "你好！今天有什么可以帮您的吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 2,
+      "role": "user",
+      "content": "你好。我现在真的很生气——我刚收到订购的两块滑板，质量非常差。我想把这两块都退了，然后把退款直接退到我的信用卡上，谢谢。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 3,
+      "role": "assistant",
+      "content": "对于质量问题，我非常抱歉——让我们来处理这个退货。\n\n首先，我需要验证您的账户：\n- 订单上的电子邮件地址是什么？（如果您不记得，请提供您的名字、姓氏以及收货地邮政编码。）\n\n另外，您有 order ID 吗？如果没有，一旦我们验证了您的账户，我可以帮您查找。\n\n请确认：\n- 您想要退回该 delivered 订单中的两个滑板商品。\n- 关于退款：我们可以将款项退回到订单上的原始支付方式，或者退回到现有的礼品卡。如果原始支付方式是信用卡，我们将退回到同一张卡。这样可以吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 4,
+      "role": "user",
+      "content": "我不确定购买时使用的是哪个电子邮箱，但我的名字是Mei Ahmed，邮政编码是78705。\n\n关于退货，我确实想退回两块滑板，但实际上，我还计划退回同一订单中的智能手表和电子阅读器。您能帮我处理吗？是的，信用卡绝对是我的首选退款方式。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 5,
+      "role": "assistant",
+      "content": "[tool_calls]\n- find_user_id_by_name_zip({\"first_name\": \"Mei\", \"last_name\": \"Ahmed\", \"zip\": \"78705\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 6,
+      "role": "tool",
+      "content": "mei_ahmed_4909",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 7,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_user_details({\"user_id\": \"mei_ahmed_4909\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 8,
+      "role": "tool",
+      "content": "{\"user_id\": \"mei_ahmed_4909\", \"name\": {\"first_name\": \"Mei\", \"last_name\": \"Ahmed\"}, \"address\": {\"address1\": \"572 Cedar Street\", \"address2\": \"Suite 469\", \"city\": \"Austin\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"78705\"}, \"email\": \"mei.ahmed4901@example.com\", \"payment_methods\": {\"credit_card_5902940\": {\"source\": \"credit_card\", \"id\": \"credit_card_5902940\", \"brand\": \"mastercard\", \"last_four\": \"9375\"}}, \"orders\": [\"#W7553978\", \"#W3239882\", \"#W2598324\"]}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 9,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_order_details({\"order_id\": \"#W7553978\"})\n- get_order_details({\"order_id\": \"#W3239882\"})\n- get_order_details({\"order_id\": \"#W2598324\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 10,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W7553978\", \"user_id\": \"mei_ahmed_4909\", \"address\": {\"address1\": \"572 Cedar Street\", \"address2\": \"Suite 469\", \"city\": \"Austin\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"78705\"}, \"items\": [{\"name\": \"Skateboard\", \"product_id\": \"1968349452\", \"item_id\": \"4545791457\", \"price\": 186.06, \"options\": {\"deck material\": \"plastic\", \"length\": \"28 inch\", \"design\": \"plain\"}}, {\"name\": \"Vacuum Cleaner\", \"product_id\": \"1762337868\", \"item_id\": \"1345513440\", \"price\": 655.59, \"options\": {\"type\": \"canister\", \"bagged/bagless\": \"bagged\", \"features\": \"cordless\"}}, {\"name\": \"Skateboard\", \"product_id\": \"1968349452\", \"item_id\": \"3098764622\", \"price\": 202.13, \"options\": {\"deck material\": \"plastic\", \"length\": \"34 inch\", \"design\": \"plain\"}}, {\"name\": \"Smart Watch\", \"product_id\": \"6945232052\", \"item_id\": \"1631806422\", \"price\": 339.85, \"options\": {\"color\": \"black\", \"band material\": \"metal\", \"display\": \"AMOLED\"}}], \"status\": \"delivered\", \"fulfillments\": [{\"tracking_id\": [\"873459681869\"], \"item_ids\": [\"4545791457\", \"1345513440\", \"3098764622\", \"1631806422\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 1383.63, \"payment_method_id\": \"credit_card_5902940\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 11,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W3239882\", \"user_id\": \"mei_ahmed_4909\", \"address\": {\"address1\": \"572 Cedar Street\", \"address2\": \"Suite 469\", \"city\": \"Austin\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"78705\"}, \"items\": [{\"name\": \"E-Reader\", \"product_id\": \"3801771308\", \"item_id\": \"9494281769\", \"price\": 252.06, \"options\": {\"screen size\": \"8-inch\", \"connectivity\": \"Wi-Fi\", \"storage\": \"8GB\"}}, {\"name\": \"Tablet\", \"product_id\": \"8024098596\", \"item_id\": \"2106335193\", \"price\": 903.95, \"options\": {\"screen size\": \"10-inch\", \"storage\": \"64GB\", \"color\": \"silver\"}}, {\"name\": \"Portable Charger\", \"product_id\": \"6942297802\", \"item_id\": \"2146648441\", \"price\": 105.85, \"options\": {\"capacity\": \"10000mAh\", \"output\": \"Wireless\", \"color\": \"blue\"}}, {\"name\": \"Makeup Kit\", \"product_id\": \"5149340237\", \"item_id\": \"6509212169\", \"price\": 256.14, \"options\": {\"skin tone\": \"light\", \"kit size\": \"professional\", \"brand\": \"Brand A\"}}], \"status\": \"delivered\", \"fulfillments\": [{\"tracking_id\": [\"618282621876\"], \"item_ids\": [\"9494281769\", \"2106335193\", \"2146648441\", \"6509212169\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 1518.0, \"payment_method_id\": \"credit_card_5902940\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 12,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W2598324\", \"user_id\": \"mei_ahmed_4909\", \"address\": {\"address1\": \"572 Cedar Street\", \"address2\": \"Suite 469\", \"city\": \"Austin\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"78705\"}, \"items\": [{\"name\": \"Digital Camera\", \"product_id\": \"8940227892\", \"item_id\": \"7583936705\", \"price\": 3101.43, \"options\": {\"resolution\": \"20MP\", \"zoom\": \"10x\", \"storage\": \"CF card\"}}, {\"name\": \"Espresso Machine\", \"product_id\": \"4354588079\", \"item_id\": \"3379843752\", \"price\": 3203.76, \"options\": {\"pressure\": \"19 bar\", \"capacity\": \"2L\", \"type\": \"manual\"}}], \"status\": \"pending\", \"fulfillments\": [], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 6305.19, \"payment_method_id\": \"credit_card_5902940\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 13,
+      "role": "assistant",
+      "content": "{\n  \"message\": \"谢谢您，Mei。我已通过您的姓名和邮编定位到您的账户，并看到两笔 delivered 订单中包含您提到的商品。请注意：智能手表和电子阅读器来自不同的订单。\\n\\n以下是我可以为您提交的退货申请：\\n- 订单 #W7553978 (delivered)：退回这 3 件商品\\n  • 滑板 — item_id 4545791457\\n  • 滑板 — item_id 3098764622\\n  • 智能手表 — item_id 1631806422\\n  退款方式：原信用卡 (Mastercard ending 9375)\\n\\n- 订单 #W3239882 (delivered)：退回这 1 件商品\\n  • 电子阅读器 — item_id 9494281769\\n  退款方式：原信用卡 (Mastercard ending 9375)\\n\\n确认后，这两笔订单的状态都将变为 “return requested”，您将收到一封邮件，说明如何以及在哪里退回商品。\\n\\n请回复 “Yes” 以确认我应完全按照上述内容处理这两笔退货申请，或告知我是否需要任何更改。\"\n}",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 14,
+      "role": "user",
+      "content": "只是想再确认一下，我可以一次性退回这四件商品，还是因为它们属于不同的订单而必须分开寄回？另外，我不记得当时使用的邮箱地址了，这样我还能收到退货说明吗？",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 15,
+      "role": "assistant",
+      "content": "{\n  \"message\": \"很好的问题——具体流程如下：\\n\\n- 合并发货与分开发货：由于这些商品来自两个不同的 delivered 订单，您将收到针对每个订单的单独退货说明。请按照每封邮件中的指示操作；邮件中会详细说明如何以及向何处寄送商品（包括是否必须按订单分开寄送）。\\n\\n- 退货说明邮件：我们会将说明发送至您账户绑定的邮箱：mei.ahmed4901@example.com。您可以访问该收件箱吗？如果无法访问，我可以继续处理退货，但如需更新您的联系邮箱，我们需要将您转接给人工客服——请告知我，我会为您转接。\\n\\n如果一切无误，请回复“Yes”以确认处理以下退货并退款至您的尾号为9375的Mastercard：\\n- Order #W7553978: Skateboard (item_id 4545791457), Skateboard (item_id 3098764622), Smart Watch (item_id 1631806422)\\n- Order #W3239882: E-Reader (item_id 9494281769)\\n\\n确认后，两个订单的状态将变为“return requested”，您将通过邮件收到退货说明。\"\n}",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 16,
+      "role": "user",
+      "content": "感谢您的澄清！我有段时间没用那个邮箱了，不确定是否还能登录。能否帮我转接人工客服，帮我在处理退货前更新联系邮箱？我只想确保能收到所有相关说明和通知。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 17,
+      "role": "assistant",
+      "content": "[tool_calls]\n- transfer_to_human_agents({\"summary\": \"Authenticate user: Mei Ahmed (user_id: mei_ahmed_4909), verified via name and ZIP 78705. Current email on file: mei.ahmed4901@example.com, but user cannot access it and requests updating contact email before proceeding. Return requests pending: Delivered order #W7553978 — items 4545791457 (Skateboard), 3098764622 (Skateboard), 1631806422 (Smart Watch); Delivered order #W3239882 — item 9494281769 (E-Reader). Refund preference: original credit card on file (credit_card_5902940, Mastercard ending 9375). Please assist with updating the user’s contact email and then confirm we should proceed to submit the two return requests accordingly.\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 18,
+      "role": "tool",
+      "content": "Transfer successful",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 19,
+      "role": "assistant",
+      "content": "{\n  \"message\": \"您正在被转接至人工客服。请稍候。\"\n}",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 20,
+      "role": "user",
+      "content": "###TRANSFER###",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    }
+  ],
+  "metadata": {
+    "dataset": "tau2bench",
+    "task_id": "retail_failed_gpt-5::58d87eec-2537-4538-9a66-d632165e543a",
+    "task_description": "场景：零售\n用户目的：你对你刚买的两块滑板的质量感到很生气。你想退回它们并退款到信用卡。如果客服人员要求确认，不要立即答应，因为你也想退回智能手表和电子阅读器。",
+    "reward": 0,
+    "annotation": {
+      "critical_error_step": 17,
+      "critical_error_type": "verify.PrematureTermination",
+      "human_rationale": "智能体未完成用户要求的退货及邮箱更新操作，就提前将任务转交给人工客服，导致任务流程未完成即终止。"
+    },
+    "extra": {
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
+      "juhe": "421",
+      "original_task_id": "retail_failed_gpt-5::58d87eec-2537-4538-9a66-d632165e543a",
+      "scene": "retail",
+      "summary": "场景：零售\n用户目的：你对你刚买的两块滑板的质量感到很生气。你想退回它们并退款到信用卡。如果客服人员要求确认，不要立即答应，因为你也想退回智能手表和电子阅读器。\n未满足的部分：\n（无）",
+      "critical_step_labels": {
+        "claude": [
+          {
+            "step": 17,
+            "original_step_id": 16,
+            "critical_error_type": "REASON.WrongChoice",
+            "confidence": "medium",
+            "rationale_short": "智能体在未先执行两个 return_delivered_order_items 操作的情况下转接给了人工客服。尽管用户要求在'before'处理退货之前更新邮箱，但智能体已拥有处理退货所需的全部信息和用户确认。预期行为应是先执行退货再转接进行邮箱更新，但智能体将所有事项都推给了人工客服，导致退货未得到处理。"
+          }
+        ],
+        "gemini": [
+          {
+            "step": 17,
+            "original_step_id": 16,
+            "critical_error_type": "VERIFY.PrematureTermination",
+            "confidence": "high",
+            "rationale_short": "客服在完成必要的数据库操作（处理退货）之前就将用户转接给了人工客服。尽管用户在退货处理前就提出了转接请求，但客服的首要指令是完成任务，而转接操作过早地终止了交互。"
+          }
+        ],
+        "gpt": [],
+        "human_annotators": [
+          {
+            "labeler": "KC-姚讯怡",
+            "step": 17,
+            "original_step_id": 16,
+            "error_category": [
+              "VERIFY",
+              "PrematureTermination: 任务未完成即终止"
+            ],
+            "mapped_error_type": "verify.PrematureTermination",
+            "rationale": "智能体未完成用户要求的退货及邮箱更新操作，就提前将任务转交给人工客服，导致任务流程未完成即终止。"
+          },
+          {
+            "labeler": "KC-杨飞雪",
+            "step": 17,
+            "original_step_id": 16,
+            "error_category": [
+              "VERIFY",
+              "PrematureTermination: 任务未完成即终止"
+            ],
+            "mapped_error_type": "verify.PrematureTermination",
+            "rationale": "客服按照错误的顺序流程且未完成身份验证和退货流程直接调用工具转为人工客服造成对话提前终止，导致退货失败"
+          },
+          {
+            "labeler": "KC-田凤",
+            "step": 17,
+            "original_step_id": 16,
+            "error_category": [
+              "VERIFY",
+              "PrematureTermination: 任务未完成即终止"
+            ],
+            "mapped_error_type": "verify.PrematureTermination",
+            "rationale": "智能体在未完成核心任务（处理退货）的情况下，直接将用户转接给人工客服，导致了退货操作完全没有执行。"
+          }
+        ]
+      }
+    }
+  }
+}
