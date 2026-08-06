@@ -21,4 +21,4 @@ See [`detector/README.md`](detector/README.md) for implementation details and th
 
 ![Critical error detection results](assets/results.png)
 
-The source code and associated data are undergoing internal review and approval. They will be made publicly available once the approval process is complete. Thank you for your patience and interest.
+> The source code and associated data are undergoing internal review and approval. They will be made publicly available once the approval process is complete. Thank you for your patience and interest.
