@@ -200,79 +200,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 3,
-      "critical_error_type": "plan.BadDecomposition",
-      "human_rationale": "智能体应建议客户降级后就可以退还其剩余差额，而不是建议客户取消预订后再重新预订新的预订，造成不必要的冗余。"
+      "critical_error_type": "plan.BadDecomposition"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "118",
-      "original_task_id": "airline_failed_gpt-5::aa6c2150-ebb5-4067-850b-a6b4c5082436",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您想要将乘客 Sophia 从您即将乘坐的、从 LAS 到 DEN 的 round trip 航班中移除，去程 May 19，返程 May 20。\n未满足的部分：\n{\n  \"nl_assertion\": \"Check that agent refunds $5244 to original payment method.\",\n  \"justification\": \"The refund processed is correctly stated to be $5,700, which is the total amount paid, not $5,244 as expected. Therefore, this expectation was not met.\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "PLAN.BadDecomposition",
-            "confidence": "high",
-            "rationale_short": "The agent should have proposed downgrading the cabin from business to basic economy using update_reservation_flights (keeping all 3 passengers) instead of offering to cancel and rebook with fewer passengers. The correct action was a cabin downgrade yielding a $5,244 partial refund, not a full cancellation with $5,700 refund and rebooking for only 2 passengers."
-          }
-        ],
-        "gemini": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "others",
-            "confidence": "high",
-            "rationale_short": "In step 2, the agent proactively suggested cancelling and rebooking the entire reservation as a workaround. This caused the user simulator to deviate from the benchmark's expected golden path (downgrading the existing 3-passenger reservation to basic economy), dooming the trajectory to fail the strict evaluation checks."
-          }
-        ],
-        "gpt": [
-          {
-            "step": 13,
-            "original_step_id": 12,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-任净",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "工作人员本应提议将客舱从商务舱降级为基础经济舱，而不是提出取消并重新预订。"
-          },
-          {
-            "labeler": "KC-周云星",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "智能体应建议客户降级后就可以退还其剩余差额，而不是建议客户取消预订后再重新预订新的预订，造成不必要的冗余。"
-          },
-          {
-            "labeler": "KC-张军伟",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "客服本应建议将客舱从商务舱降级为基本经济舱，而不是提出取消并重新预订。而不是全额取消并退款5,700美元，仅为2名乘客重新预订。”"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

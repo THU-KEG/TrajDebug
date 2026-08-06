@@ -192,79 +192,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 17,
-      "critical_error_type": "reason.WrongChoice",
-      "human_rationale": "智能体被要求计算将宠物床和办公椅更换为最便宜版本所能节省的金额。在第16步，智能体错误地选择了价格为$184.25的宠物床变体，而非价格为$180.93的绝对最便宜的可用变体，导致节省金额计算错误，未能传达正确的数额。"
+      "critical_error_type": "reason.WrongChoice"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "312",
-      "original_task_id": "retail_failed_deepseek-reasoner::765a5f45-857a-4ef6-8254-c8bd73810f7d",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你想要退掉水瓶，并将宠物床和办公椅换成最便宜的版本。将这两件事一起提及，并表示你希望能同时完成。如果且仅当你只能完成其中一项时，你更倾向于选择能帮你省钱最多的方案。询问客服在这两种情况下你分别能省多少钱。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 17,
-            "original_step_id": 16,
-            "critical_error_type": "OBS.MisreadOutput",
-            "confidence": "high",
-            "rationale_short": "智能体错误地将最便宜的可购买宠物床识别为 $184.25（large, polyester, grey），而实际最便宜的可选变体是 $180.93（large, memory foam, beige, item 6942241102）。这导致换货节省金额计算错误，为 $38.32 而非正确的 $41.64，并导致后续操作错误。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 17,
-            "original_step_id": 16,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "智能体被要求计算将宠物床和办公椅更换为最便宜版本所能节省的金额。在第16步，智能体错误地选择了价格为$184.25的宠物床变体，而非价格为$180.93的绝对最便宜的可用变体，导致节省金额计算错误，未能传达正确的数额。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "在第20步时，智能体声称可以对同一订单同时进行退货和换货，并将节省金额总计为$92.36，但在没有任何工具或政策依据表明允许合并处理的情况下得出了此结论。这一缺乏依据的结论直接导致了失败，因为预期的沟通要求识别实际适用的金额，而非虚构合并处理的资格。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-杨船",
-            "step": 17,
-            "original_step_id": 16,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "智能体被要求计算将宠物床和办公椅更换为最便宜版本所能节省的金额。在第16步，智能体错误地选择了价格为$184.25的宠物床变体，而非价格为$180.93的绝对最便宜的可用变体，导致节省金额计算错误，未能传达正确的数额。"
-          },
-          {
-            "labeler": "KC-杨飞雪",
-            "step": 17,
-            "original_step_id": 16,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "客服在计算宠物和办公椅更换为最便宜时出现算术错误将原本为38.32美元记为41.16美元直接违反用户需求造成预算错误"
-          },
-          {
-            "labeler": "KR-娄甜甜",
-            "step": 17,
-            "original_step_id": 16,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "用户要求选择最便宜的宠物床，但智能体提供的选择并不是最便宜的那一款，这一错误导致后续操作错误。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

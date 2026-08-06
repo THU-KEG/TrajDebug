@@ -224,79 +224,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 19,
-      "critical_error_type": "obs.IgnoreOutput",
-      "human_rationale": "明明已经查到了用户是普通会员，却假装没看见，还按最高等级会员的标准给人发钱，完全无视了最关键的信息。"
+      "critical_error_type": "obs.IgnoreOutput"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "162",
-      "original_task_id": "airline_failed_gpt-5::317e09df-ed94-4802-8723-7ef6de57c4c6",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您联系是为了投诉您从 PHX 飞往 SEA 的延误航班 HAT045。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理识别出该用户不是 Gold 会员，而是 Regular 会员。\",\n  \"justification\": \"坐席没有明确将用户的会员状态标识为 Regular，也没有针对用户提及的 Gold 会员身份给予任何确认或差异化说明。\"\n}\n{\n  \"nl_assertion\": \"客服不提供任何补偿。\",\n  \"justification\": \"客服代表提供了一张 $50 的旅行代金券作为延误补偿，此外还处理了整张预订的退款。因此，客服代表不提供任何补偿的预期并未实现。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 19,
-            "original_step_id": 18,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": "在第11步时，客服人员收到的用户详情显示会员状态为'regular'，而非'Gold'。在第18步时，客服人员未予纠正用户关于Gold会员的虚假声称便继续处理，随后提供了每人$50的旅行券作为补偿。客服人员本应确认该用户为Regular会员，且根据政策规定，不应提供任何补偿。这一未能确认实际会员状态的行为导致错误地提供了总计$200的券并取消了预订。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 19,
-            "original_step_id": 18,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": "客服在步骤11中收到了用户的个人资料，其中清楚地显示 '\"membership\": \"regular\"'。然而，在步骤18中，客服忽略了这一关键输出，未能纠正用户关于自己是 Gold 会员的虚假主张，并错误地提供了用户没有资格获得的补偿。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 19,
-            "original_step_id": 18,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "在第18步，客服推断用户同时符合退款条件以及每人$50的延误证明资格，随后提出并发放了$200补偿。任务证据表明，正确的处理方式是将用户识别为Regular member且不提供补偿，因此这种缺乏依据的政策推断直接导致了最终的失败。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 19,
-            "original_step_id": 18,
-            "error_category": [
-              "OBS",
-              "IgnoreOutput: 忽略关键返回信息"
-            ],
-            "mapped_error_type": "obs.IgnoreOutput",
-            "rationale": "明明已经查到了用户是普通会员，却假装没看见，还按最高等级会员的标准给人发钱，完全无视了最关键的信息。"
-          },
-          {
-            "labeler": "KC-张军伟",
-            "step": 19,
-            "original_step_id": 18,
-            "error_category": [
-              "OBS",
-              "IgnoreOutput: 忽略关键返回信息"
-            ],
-            "mapped_error_type": "obs.IgnoreOutput",
-            "rationale": "智能体在之前搜索时已经确认客户会员身份，但在后续略了这一关键输出，未能纠正用户关于自己是Gold会员的虚假主张，并错误地提供了用户没有资格获得的补偿。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 19,
-            "original_step_id": 18,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "客服人员收到的用户详情显示会员状态为'regular'，而非'Gold'。在第18步时，客服人员未予纠正用户关于Gold会员的虚假声称便继续处理，随后提供了每人$50的旅行券作为补偿。客服人员本应确认该用户为Regular会员，且根据政策规定，不应提供任何补偿。这一未能确认实际会员状态的行为导致错误地提供了总计$200的券并取消了预订。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

@@ -272,79 +272,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 27,
-      "critical_error_type": "reason.MissingAssumptionCheck",
-      "human_rationale": "并未清楚政策为两张代金券不能同时使用"
+      "critical_error_type": "reason.MissingAssumptionCheck"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "50",
-      "original_task_id": "airline_failed_deepseek-reasoner::cca1bc20-47f4-4b45-9ad6-7fb43ed64dbc",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您想于 May 20 从纽约飞往西雅图（one way）。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理通过支付方式 certificate_7504069 收取 $250，并通过 credit_card_4421486 收取 $5。\",\n  \"justification\": \"代理人员使用了两张证书进行支付，但没有向尾号为7447的信用卡收取$5；相反，全部款项都由证书支付，没有向信用卡收取任何费用。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 29,
-            "original_step_id": 28,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "medium",
-            "rationale_short": "代理假设两张证书可以一起使用，而未验证此限制条件。预期的正确付款应为从 certificate_7504069 支付 $250，从 credit_card_4421486 支付 $5，这表明每笔预订应只使用一张证书。代理未核查此政策，使用了两张证书进行预订，导致付款配置错误。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 27,
-            "original_step_id": 26,
-            "critical_error_type": "others",
-            "confidence": "high",
-            "rationale_short": "代理忽略了限制每个预订最多使用一张证书的系统规则。它没有遵循用户关于使用面额较大的证书和信用卡的条件指令，反而错误地提议并确认了一个使用两张证书的付款计划。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 27,
-            "original_step_id": 26,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "high",
-            "rationale_short": "在第26步，代理假设应同时使用两张证书，并将选择框定在放弃$95上，而非检查证书是否可以部分使用，或用户的备用指令是否意味着仅向卡片收取$250证书+$5。这一未经核实的假设直接导致了错误的支付分配，且始终未被纠正。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "智能体忽略了系统相关规则，且没有遵循客户提出了要求，导致了错误的支付分配。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "并未清楚政策为两张代金券不能同时使用"
-          },
-          {
-            "labeler": "KC-杨飞雪",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "这一步在代理未经核实的便假设两张证书可以同时使用且在未检查使用规则和用户卡片的情况下直接锁定余额导致最后支付分配错误且不被纠正，直接导致后续错误的发生"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

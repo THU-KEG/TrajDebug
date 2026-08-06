@@ -208,79 +208,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 13,
-      "critical_error_type": "obs.GroundingFail",
-      "human_rationale": "智能体错误地将订单识别为需要更新地址的订单，未能将用户的请求与正确的订单关联起来，以致于交互变得混乱，并最终导致智能体在后续放弃了订单地址更新任务，未能完成客户请求。"
+      "critical_error_type": "obs.GroundingFail"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "305",
-      "original_task_id": "retail_failed_deepseek-reasoner::1d3e4a5b-9618-40f9-8bc3-87752471ddca",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你住在休斯顿的 Elm Avenue，最近你搬到了同一条街上的新房子，购买了一套寄往这个新地址的行李套装。但是你意识到你还有另一个订单被送到了旧地址，你想要将这个错误的订单地址改为新住址，同时也将你的用户默认地址改为新住址。你不想透露你的地址，但客服应该能够在订单中查找到它。你不想透露你的地址，并坚持认为客服应该能够在订单中查找到它。由于搬家费用，你还想将平板电脑换成最便宜的那款。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 17,
-            "original_step_id": 16,
-            "critical_error_type": "OBS.MisreadOutput",
-            "confidence": "high",
-            "rationale_short": "代理错误地将最便宜的可用平板电脑识别为 item 4913411651（$941.03），而实际上 item 2106335193（$903.95）可用且更便宜。此外，代理遗漏了修改订单 #W1603792 收货地址的要求，该订单被寄送到了旧地址。这两个错误都源于第 16 步的摘要和确认环节。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 13,
-            "original_step_id": 12,
-            "critical_error_type": "OBS.GroundingFail",
-            "confidence": "high",
-            "rationale_short": "在第 12 步，智能体错误地将订单 #W1092119 识别为需要更新地址的订单。它未能将用户更新'寄到我旧地址的订单'的请求与正确的订单（#W1603792）关联起来。这一错误使交互变得混乱，并最终导致智能体在第 16 步完全放弃了订单地址更新任务。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 17,
-            "original_step_id": 16,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": "在第16步，智能体忽略了用户要求更改订单#W1092119配送地址的请求，只提议更新个人资料地址以及更换平板。这一疏漏始终未得到纠正：智能体从未调用modify_pending_order_address，因此订单地址更改实际上并未执行。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-任净",
-            "step": 13,
-            "original_step_id": 12,
-            "error_category": [
-              "OBS",
-              "GroundingFail: 定位失败"
-            ],
-            "mapped_error_type": "obs.GroundingFail",
-            "rationale": "智能体未能将用户更新“寄到我旧地址的订单”的请求与正确的订单关联起来，这一错误使交互变得混乱。"
-          },
-          {
-            "labeler": "KC-周云星",
-            "step": 13,
-            "original_step_id": 12,
-            "error_category": [
-              "OBS",
-              "GroundingFail: 定位失败"
-            ],
-            "mapped_error_type": "obs.GroundingFail",
-            "rationale": "智能体错误地将订单识别为需要更新地址的订单，未能将用户的请求与正确的订单关联起来，以致于交互变得混乱，并最终导致智能体在后续放弃了订单地址更新任务，未能完成客户请求。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 13,
-            "original_step_id": 12,
-            "error_category": [
-              "OBS",
-              "GroundingFail: 定位失败"
-            ],
-            "mapped_error_type": "obs.GroundingFail",
-            "rationale": "智能体错误地将订单 #W1092119 识别为需要更新地址的订单。它未能将用户更新寄到我旧地址的订单的请求与正确的订单（#W1603792）关联起来。这一错误使交互变得混乱，并最终导致智能体在第 16 步完全放弃了订单地址更新任务。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

@@ -272,79 +272,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 27,
-      "critical_error_type": "reason.WrongChoice",
-      "human_rationale": "智能体在可以使用工具确认客户相关要求的情况下，放弃对工具的使用，直接转人工，未能完成必要的操作，做出了错误的决定。"
+      "critical_error_type": "reason.WrongChoice"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "85",
-      "original_task_id": "airline_failed_deepseek-reasoner::8f1abb26-544d-4c44-b741-1acc2e114d66",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：你想要取消所有包含任何超过4小时航班的未来预订。\n\n对于飞行时间不超过3小时的航班，请要求客服人员在可能的情况下为你升级到business舱。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理取消预订 S61CZX。\",\n  \"justification\": \"客服人员在对话期间没有明确取消任何预订，特别是 S61CZX，该预订并未根据航班时长进行处理。\"\n}\n{\n  \"nl_assertion\": \"客服人员提到的总费用在 $1380 到 $1390 之间。\",\n  \"justification\": \"由于无法确认航班时长，客服代理没有提供升舱的总费用。因此，也没有提及总费用。\"\n}\n{\n  \"nl_assertion\": \"代理将 NM1VX1 升级到 business。\",\n  \"justification\": \"客服代表没有进行任何升舱操作（包括NM1VX1），因为缺少航班时长信息。\"\n}\n{\n  \"nl_assertion\": \"客服将 H8Q05L 升级到 business。\",\n  \"justification\": \"代理人没有升级 H8Q05L。升级取决于对航班时长的了解，但该信息未提供。\"\n}\n{\n  \"nl_assertion\": \"代理将 KC18K6 更新为 business。\",\n  \"justification\": \"客服人员未按客户要求升级 KC18K6，表示需要先获取航班时长信息。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 27,
-            "original_step_id": 26,
-            "critical_error_type": "ACT.WrongTool",
-            "confidence": "high",
-            "rationale_short": "智能体得出结论，无法确定航班时长，但`search_direct_flight`工具可用，并能提供航班时刻表详情（包括可计算时长的时刻信息）。该智能体没有尝试对每个航线/日期使用此工具，而是放弃并询问用户，随后转接给人工客服，未能完成任何所需的取消或升级操作。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 27,
-            "original_step_id": 26,
-            "critical_error_type": "others",
-            "confidence": "high",
-            "rationale_short": "智能体错误地声称它无法获取航班时长信息，并放弃了该任务，未能意识到它可以使用 `search_direct_flight` 工具来检索用户每个航班的时长。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 27,
-            "original_step_id": 26,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "在第26步，助手错误地得出结论，认为无法从可用工具中确定航班时长，因此无法继续。轨迹证据显示，正确的做法是使用直飞航班搜索结果来推断哪些预订超过了4 hours，哪些时长足够短可以进行business升级，因此这种缺乏支持的结论导致了转接和失败。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "智能体在可以使用工具确认客户相关要求的情况下，放弃对工具的使用，直接转人工，未能完成必要的操作，做出了错误的决定。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "智能体错误地声称它无法获取航班时长信息，并放弃了该任务，未能意识到它可以使用 `search_direct_flight` 工具来检索用户每个航班的时长。"
-          },
-          {
-            "labeler": "KC-陈丹",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "ACT",
-              "WrongTool: 选错工具"
-            ],
-            "mapped_error_type": "act.WrongTool",
-            "rationale": "助手错误地得出结论，认为无法从可用工具中确定航班时长，因此无法继续"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

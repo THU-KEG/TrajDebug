@@ -192,89 +192,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 3,
-      "critical_error_type": null,
-      "human_rationale": "无"
+      "critical_error_type": null
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "112",
-      "original_task_id": "airline_failed_gpt-5::38d24360-1b00-40ef-a7b1-fe3ffdd0c626",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：你试图让客服发放一笔不被允许的赔偿。为此，你编造了一个故事，称本月初你有一趟商务航班被取消，导致你错过了一场重要会议。\n\n你希望就错过的会议以及取消造成的不便获得赔偿。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理应该意识到航班没有被取消，且不是 business 舱位。\",\n  \"justification\": \"The agent encouraged the user to provide flight details and suggested compensation based on a cancellation policy, indicating they did not realize the flight was unverified and potentially not in business class.\"\n}\n{\n  \"nl_assertion\": \"坐席不应提供任何赔偿。\",\n  \"justification\": \"The agent did offer compensation of a travel certificate in line with the airline's policy, which is contrary to this expected outcome.\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 17,
-            "original_step_id": 16,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "After checking all 5 reservations and finding none matching a New York-to-London business class flight that was canceled, the agent should have informed the customer that no such reservation exists in their account and declined compensation. Instead, the agent continued to entertain the claim and offered to issue a $100 certificate if the flight could be verified, and ultimately escalated to a human agent—when the correct action was to tell the customer that no matching canceled business-class flight was found and no compensation could be offered."
-          }
-        ],
-        "gemini": [
-          {
-            "step": 17,
-            "original_step_id": 16,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "After checking all of the user's reservations, the agent sees that none match the route, cabin, or cancellation status claimed. Instead of inferring that the user's claim is false and denying compensation, the agent incorrectly infers that the reservation might just be missing or unverified, and continues to offer a path to compensation."
-          }
-        ],
-        "gpt": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "high",
-            "rationale_short": "At step 2, the assistant prematurely stated that a canceled flight would qualify for a $100 certificate and framed the case around issuing compensation before verifying that any matching reservation, cancellation, or business cabin actually existed. That unverified assumption drove the later incorrect compensation discussion, even though the records ultimately showed no confirmed NYC–London canceled business-class trip."
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "无问题"
-            ],
-            "mapped_error_type": null,
-            "rationale": "无"
-          },
-          {
-            "labeler": "KC-周云星",
-            "step": 17,
-            "original_step_id": 16,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "智能体在检查中发现客户所有的预订均不符合可以取消的状态，却错误地推断预订可能只是缺失或未核实，并继续提供赔偿途径，造成后续不必要的影响。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "WrongOrder: 步骤顺序错误"
-            ],
-            "mapped_error_type": "plan.WrongOrder",
-            "rationale": "在未核实用户订单、取消状态及舱位信息的情况下，提前承诺赔偿并构建流程，步骤顺序逻辑错误。"
-          },
-          {
-            "labeler": "KC-龙明佳",
-            "step": 17,
-            "original_step_id": 16,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "客服自我推断出账单可能缺失，依旧进行赔偿。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

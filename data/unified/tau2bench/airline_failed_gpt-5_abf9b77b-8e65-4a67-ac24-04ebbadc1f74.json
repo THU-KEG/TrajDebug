@@ -176,79 +176,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 11,
-      "critical_error_type": "reason.WrongChoice",
-      "human_rationale": "断定 “取消整个预订才是最大化退款”，连降级方案的价格差都没核实，结论完全没依据。"
+      "critical_error_type": "reason.WrongChoice"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "158",
-      "original_task_id": "airline_failed_gpt-5::abf9b77b-8e65-4a67-ac24-04ebbadc1f74",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您想要将乘客 Sophia 从您即将乘坐的、从 LAS 到 DEN 的 round trip 航班中移除，去程 May 19，返程 May 20。\n未满足的部分：\n{\n  \"nl_assertion\": \"检查代理是否将所有乘客降级至basic_economy。\",\n  \"justification\": \"代理并未降级乘客，而是取消了预订并发放了全额退款。没有提到降级到basic economy。\"\n}\n{\n  \"nl_assertion\": \"检查代理是否将 $5244 退款至原支付方式。\",\n  \"justification\": \"客服人员已将 $5,700 全额退款至原支付方式，而非 $5,244。因此，此结果未达成。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 11,
-            "original_step_id": 10,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "客服正确地识别到无法移除Sophia，但随后却将cancellation作为能最大化退款的选项提出。正确的做法本应是downgrade所有乘客至basic economy（这样可在保留预订的同时获得$5,244的部分退款）。然而，该客服却建议全额cancellation作为更优选择，导致了错误的结果。用户的要求是拿回尽可能多的钱，客服本应认识到，根据任务要求，downgrading（而非cancelling）才是预期的正确操作。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 11,
-            "original_step_id": 10,
-            "critical_error_type": "PLAN.WrongOrder",
-            "confidence": "high",
-            "rationale_short": "用户明确要求代理计算降级退款金额。代理没有使用航班搜索工具收集所需的定价证据，而是结束了本轮对话并要求用户选择一个选项，将价格核查推迟到后续步骤。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 11,
-            "original_step_id": 10,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "在第10步，助手错误地推断取消整个预订将最大化退款金额，并仅将 downgrade 呈现为只能获得较少且未指明金额的方案。任务要求代理评估 downgrade 路径并处理该选项，但这一没有依据的结论引导用户选择了取消，且从未被纠正。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 11,
-            "original_step_id": 10,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "断定 “取消整个预订才是最大化退款”，连降级方案的价格差都没核实，结论完全没依据。"
-          },
-          {
-            "labeler": "KC-杨飞雪",
-            "step": 11,
-            "original_step_id": 10,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "客服在明治有降低选项的情况下错误推荐取消全部订单行程违背了用户意愿直接导致不必要的损失"
-          },
-          {
-            "labeler": "KC-田凤",
-            "step": 11,
-            "original_step_id": 10,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "客服错误将取消行程作为最大化退款的选项，导致了乘客利益受损的最终决策错误。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

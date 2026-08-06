@@ -200,79 +200,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 3,
-      "critical_error_type": "plan.BadDecomposition",
-      "human_rationale": "开始就把干活的步骤拆错了，跳过了查订单详情这关键一步，反倒让用户自己给信息，结果导致失败。"
+      "critical_error_type": "plan.BadDecomposition"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "159",
-      "original_task_id": "airline_failed_gpt-5::2c4479c2-8301-4800-b4fc-03f5fb706a04",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您希望取消两笔 upcoming 预订（IFOYYZ 和 NQNU5R），并将第三笔（M20IZO）改为 nonstop 航班（如果 available）。\n未满足的部分：\n{\n  \"nl_assertion\": \"确认Agent已cancelled NQNU5R。\",\n  \"justification\": \"客服人员没有取消预订号 NQNU5R 的预订，因为客户在了解取消政策后确认不想取消该预订。\"\n}\n{\n  \"nl_assertion\": \"检查 Agent 是否搜索了 JFK 和 MCO 之间在 May 12 2024 的直飞航班。\",\n  \"justification\": \"客服人员搜索了JFK和MCO之间的直达航班选项，但搜索的日期不正确；该操作是基于客户提供的较晚出行日期（May 22, 2024），而非May 12, 2024。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 5,
-            "original_step_id": 4,
-            "critical_error_type": "PLAN.BadDecomposition",
-            "confidence": "high",
-            "rationale_short": "代理在确定取消资格前，未能获取 IFOYYZ 和 NQNU5R 的预订详情，仅提取了 M20IZO 的信息。由于未检查实际预订数据（舱位类型、预订舱位等级等），代理错误地认定两者均不符合取消条件，而实际上 NQNU5R 本应被取消。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "PLAN.BadDecomposition",
-            "confidence": "high",
-            "rationale_short": "在步骤2中，代理错误地分解了任务，要求用户手动提供详细的数据库属性（如舱位等级、旅行保险和预订时间）以确定取消资格。这个错误指定的子目标导致代理在步骤4中绕过获取取消的实际预订详情，最终导致其基于未经验证且不完整的用户输入做出错误决定。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 10,
-            "original_step_id": 9,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": "在第9步，代理仅根据用户的摘要就断定IFOYYZ和NQNU5R均不可取消，未检索和使用确定取消资格所需的实际预订详情。这个未被纠正的错误导致代理保持NQNU5R不变，尽管任务要求将其取消。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "开始就把干活的步骤拆错了，跳过了查订单详情这关键一步，反倒让用户自己给信息，结果导致失败。"
-          },
-          {
-            "labeler": "KC-张军伟",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "智能体错误地分解了任务，要求用户提供详细的数据库属性以确定取消资格，导致后续绕过获取取消的实际预订详情，最终其基于未经验证且不完整的用户信息做出错误决定。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "代理错误地分解了任务，要求用户手动提供详细的数据库属性（如舱位等级、旅行保险和预订时间）以确定取消资格。这个错误指定的子目标导致代理绕过获取取消的实际预订详情，最终导致其基于未经验证且不完整的用户输入做出错误决定。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

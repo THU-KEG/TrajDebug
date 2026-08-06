@@ -240,90 +240,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 21,
-      "critical_error_type": "reason.WrongChoice",
-      "human_rationale": "在已有匹配选项的情况下，错误地推荐了高亮度 / 超规格的无效商品。"
+      "critical_error_type": "reason.WrongChoice"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "276",
-      "original_task_id": "retail_failed_deepseek-reasoner::7c79fdda-5de5-4826-a5e9-492dc613b0a7",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你想要更换水瓶和台灯。你想把水瓶换成更大的，把台灯换成更亮的（优先：电池供电 > USB供电 > 交流电）。如果客服人员要求确认，只更换台灯。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 25,
-            "original_step_id": 24,
-            "critical_error_type": "ACT.ToolSchemaMismatch",
-            "confidence": "medium",
-            "rationale_short": "代理将台灯和水瓶打包到一个换货调用中，但预期行为是仅更换台灯（item_ids: ['8384507844'], new_item_ids: ['9083642334']）。在换货调用中包含水瓶导致操作与预期换货不匹配，且数据库状态不正确。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "用户请求商品换货，但隐式期望未提及的属性（如材质和颜色）保持不变。在第20步，助手展示了违反这些约束的变体，例如在原始商品为玻璃的情况下提供了1000ml不锈钢水瓶，甚至在用户明确要求更亮的灯时提供了中等亮度的灯。这种错误的候选商品选择导致用户选择了一个无效商品，造成最终的换货操作失败。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 25,
-            "original_step_id": 24,
-            "critical_error_type": "ACT.WrongActionSequence",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "在已有匹配选项的情况下，错误地推荐了高亮度 / 超规格的无效商品。"
-          },
-          {
-            "labeler": "KC-顾凌云",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "户请求商品换货，但隐式期望未提及的属性（如材质和颜色）保持不变。在第20步，助手展示了违反这些约束的变体，例如在原始商品为玻璃的情况下提供了1000ml不锈钢水瓶，甚至在用户明确要求更亮的灯时提供了中等亮度的灯。这种错误的候选商品选择导致用户选择了一个无效商品，造成最终的换货操作失败。\""
-          },
-          {
-            "labeler": "KC-顾凌云",
-            "step": 25,
-            "original_step_id": 24,
-            "error_category": [
-              "ACT",
-              "ToolSchemaMismatch: 参数不符合 Schema"
-            ],
-            "mapped_error_type": "act.ToolSchemaMismatch",
-            "rationale": "与用户预期不符，更换错误"
-          },
-          {
-            "labeler": "KC-龙明佳",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "未按用户“更亮台灯、更大水瓶”的约束筛选选项，推荐了不符合要求的商品，导致用户选择无效选项，最终换货失败。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

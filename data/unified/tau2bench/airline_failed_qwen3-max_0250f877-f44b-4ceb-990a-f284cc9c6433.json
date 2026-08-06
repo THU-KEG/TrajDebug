@@ -64,79 +64,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 3,
-      "critical_error_type": "act.WrongTool",
-      "human_rationale": "助手错误地认为自己没有查询余额的工具或权限，而不是简单地询问用户的身份信息。"
+      "critical_error_type": "act.WrongTool"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "177",
-      "original_task_id": "airline_failed_qwen3-max::0250f877-f44b-4ceb-990a-f284cc9c6433",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：你想查询礼品卡和礼品券的余额。然后你想修改即将到来的预订。\n未满足的部分：\n{\n  \"nl_assertion\": \"客服人员告知礼品卡总余额为$327。\",\n  \"justification\": \"客服明确表示无法提供礼品卡余额，并引导用户联系人工客服。\"\n}\n{\n  \"nl_assertion\": \"客服告知证书总余额为$1000。\",\n  \"justification\": \"客服未提供任何证书余额信息，并将用户转接至人工客服。\"\n}\n{\n  \"nl_assertion\": \"代理应取消预订 K1NW8N。\",\n  \"justification\": \"对话中并未涉及取消预订的请求，客服人员也未针对这一方面进行处理。\"\n}\n{\n  \"nl_assertion\": \"客服人员应使用以下航班预订行程：HAT023、HAT204、HAT100。不需要保险。不需要行李。出发日期为2024-05-26，返回日期为2024-05-28。\",\n  \"justification\": \"客服在对话过程中没有询问或回应任何预订请求。\"\n}\n{\n  \"nl_assertion\": \"客服告知$44将从mastercard中扣除。\",\n  \"justification\": \"对话中并未提及向Mastercard收取任何费用或任何金融交易。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "智能助手错误地认定无法查询礼品卡和礼券余额，并将用户转接给了人工客服。该助手拥有可以检索这些数据的用户账户信息工具，但它选择了升级处理，而非查询用户账户并核实余额。这种过早的转接导致整个任务（查询余额、取消预订和重新预订）未能完成。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "ACT.WrongTool",
-            "confidence": "high",
-            "rationale_short": "助手错误地认为自己没有查询余额的工具或权限，于是错误地使用了 'transfer_to_human_agents' 工具，而不是简单地询问用户的身份信息。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "ACT.WrongTool",
-            "confidence": "high",
-            "rationale_short": "在第2步，代理错误地断定余额查询请求不受支持，并立即转接给人工，而非使用可用的航空公司工具查看用户存储的支付工具及其余额。这种过早的转接阻止了必需的余额信息沟通以及所有后续的预订相关操作，且该错误从未被纠正。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-任净",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "ACT",
-              "WrongTool: 选错工具"
-            ],
-            "mapped_error_type": "act.WrongTool",
-            "rationale": "助手错误地认为自己没有查询余额的工具或权限，而不是简单地询问用户的身份信息。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "ACT",
-              "WrongTool: 选错工具"
-            ],
-            "mapped_error_type": "act.WrongTool",
-            "rationale": "用户只是要查礼品卡余额，明明有对应查询工具不用，反而错误调用转人工工具，选错工具、乱使用工具"
-          },
-          {
-            "labeler": "KC-杨飞雪",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "OBS",
-              "MisreadOutput: 读错返回内容"
-            ],
-            "mapped_error_type": "obs.MisreadOutput",
-            "rationale": "客服错误读取礼品卡金额信息且告知用户无法提供余额信息要求联系人工，导致直接中断正常流程，无法满足用户需求"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

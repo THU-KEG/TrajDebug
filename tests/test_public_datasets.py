@@ -6,6 +6,7 @@ from data_processing.schema import validate_unified
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SWE_BENCH_PRO = REPO_ROOT / "data" / "unified" / "swebenchpro"
+TAU2BENCH = REPO_ROOT / "data" / "unified" / "tau2bench"
 
 
 def test_swebenchpro_release_has_86_valid_records():
@@ -25,8 +26,24 @@ def test_swebenchpro_release_has_86_valid_records():
         assert metadata["task_id"] not in task_ids
         assert isinstance(step, int) and 0 <= step < len(messages)
         assert messages[step]["role"] == "assistant"
-        assert "critical_step_labels" not in metadata.get("extra", {})
+        assert "human_rationale" not in annotation
+        assert set(metadata.get("extra", {})) <= {"agent_framework_description"}
         task_ids.add(metadata["task_id"])
+
+
+def test_tau2bench_release_has_400_sanitized_records():
+    paths = sorted(TAU2BENCH.glob("*.json"))
+    assert len(paths) == 400
+
+    for path in paths:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        validate_unified(payload)
+        metadata = payload["metadata"]
+        annotation = metadata["annotation"]
+
+        assert metadata["dataset"] == "tau2bench"
+        assert "human_rationale" not in annotation
+        assert set(metadata.get("extra", {})) <= {"agent_framework_description"}
 
 
 def test_removed_swebenchpro_variant_is_absent():

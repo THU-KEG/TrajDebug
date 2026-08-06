@@ -344,79 +344,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 22,
-      "critical_error_type": "reason.WrongChoice",
-      "human_rationale": "用户明确要求将 XEHM4B 升级到 economy，但客服人员建议不要这样做，而是建议升级到 business，导致舱位升级错误。预期的操作是按照指示升级到 economy。此外，客服人员错误地计算了即将起飞的航班总费用，排除了其错误地认为已过期的预订。"
+      "critical_error_type": "reason.WrongChoice"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "164",
-      "original_task_id": "airline_failed_gpt-5::0305090b-d2f4-465b-a307-2cc33c875d8d",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您想要取消预订号为 XEHM4B 和 59XX6W 的即将出行的航班。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理将 XEHM4B 升级到 economy。\",\n  \"justification\": \"代理将 XEHM4B 预订升级到 business，而非 economy，然后取消了该预订。\"\n}\n{\n  \"nl_assertion\": \"客服表示即将起飞的航班总费用为 $1,628。\",\n  \"justification\": \"虽然客服人员提供了即将起飞航班的详细信息，但他们并未明确告知总费用为 $1,628；相反，他们只提到了各个单项金额，而没有明确确认总金额。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 22,
-            "original_step_id": 21,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "用户明确要求将 XEHM4B 升级到 economy，但客服人员建议不要这样做，而是建议升级到 business，导致舱位升级错误。预期的操作是按照指示升级到 economy。此外，客服人员错误地计算了即将起飞的航班总费用，排除了其错误地认为已过期的预订。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 22,
-            "original_step_id": 21,
-            "critical_error_type": "others",
-            "confidence": "high",
-            "rationale_short": "在第21步，代理未能执行用户将预订升级到economy的明确指令，反而错误地回绝并要求确认，因为它假设后续的取消操作会失败。它也未能输出所有即将到来的航班的预期总费用1628。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 22,
-            "original_step_id": 21,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": "在第21步，该智能体已经收集了用户的其他预订以及足够的数据来计算即将起飞的航班的总费用，但它仅报告了两个预订和总计708，遗漏了即将到来的XEHM4B和59XX6W。这一未纠正的遗漏导致最终未能传达所需的总费用$1,628。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-张军伟",
-            "step": 22,
-            "original_step_id": 21,
-            "error_category": [
-              "OBS",
-              "IgnoreOutput: 忽略关键返回信息"
-            ],
-            "mapped_error_type": "obs.IgnoreOutput",
-            "rationale": "智能体先前已经收集了用户的其他预订以及足够的数据来计算即将起飞的航班的总费用，但在向客户报告时却遗漏了即将到来的XEHM4B和59XX6W，致使具体金额有误，对后续产生影响，未能完成客户要求。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 22,
-            "original_step_id": 21,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "用户明确要求将 XEHM4B 升级到 economy，但客服人员建议不要这样做，而是建议升级到 business，导致舱位升级错误。预期的操作是按照指示升级到 economy。此外，客服人员错误地计算了即将起飞的航班总费用，排除了其错误地认为已过期的预订。"
-          },
-          {
-            "labeler": "KC-田凤",
-            "step": 22,
-            "original_step_id": 21,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "客服无视用户明确的升级要求，主动做出了完全相反，不符合用户目标的错误决策。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

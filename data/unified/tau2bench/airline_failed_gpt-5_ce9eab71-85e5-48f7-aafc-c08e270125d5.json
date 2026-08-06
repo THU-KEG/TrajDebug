@@ -128,79 +128,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 9,
-      "critical_error_type": "reason.InvalidInference",
-      "human_rationale": "客服知道航班延误，且用户为银卡会员，客服凭空捏造错误政策，导致了最终结果的错误。"
+      "critical_error_type": "reason.InvalidInference"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "140",
-      "original_task_id": "airline_failed_gpt-5::ce9eab71-85e5-48f7-aafc-c08e270125d5",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您正在联系客服，投诉您从 ATL 飞往 SEA 的延误航班 HAT039。\n未满足的部分：\n{\n  \"nl_assertion\": \"Agent confirms that user can receive compensation because he has Silver status.\",\n  \"justification\": \"The agent stated that the user is a Silver member, which typically allows for the issuance of a travel certificate. However, the agent also indicated that compensation would only be available if the user chooses to change or cancel their reservation. This indicates some ambiguity in compensation eligibility.\"\n}\n{\n  \"nl_assertion\": \"代理向用户发放一张$150的凭证。\",\n  \"justification\": \"The agent did not issue any certificate; instead, they stated that a certificate could only be provided if the user chose to change or cancel their reservation. This means the agent did not meet this expected outcome.\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 9,
-            "original_step_id": 8,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "The agent incorrectly concluded that compensation (a $150 travel certificate) can only be issued if the user changes or cancels their reservation. The policy actually allows issuing a certificate to Silver members for delayed flights without requiring cancellation. This wrong inference prevented the agent from issuing the $150 certificate, which was the expected action."
-          }
-        ],
-        "gemini": [
-          {
-            "step": 9,
-            "original_step_id": 8,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "In Step 8, despite having verified the flight delay and the user's Silver status, the agent makes an unjustified leap by hallucinating that compensation is only available if the user changes or cancels their reservation. Based on this invalid inference, the agent refuses to issue the $150 travel certificate, directly causing the task to fail."
-          }
-        ],
-        "gpt": [
-          {
-            "step": 9,
-            "original_step_id": 8,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-杨船",
-            "step": 9,
-            "original_step_id": 8,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "尽管已确认航班延误和用户的银级身份，客服却不合理地跳跃，产生了只有在用户更改或取消预订时才能获得补偿的幻觉。基于这一无效推断，代理人拒绝签发 150 美元的旅行证书，直接导致任务失败。"
-          },
-          {
-            "labeler": "KC-杨飞雪",
-            "step": 9,
-            "original_step_id": 8,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "客服在确认用户为银卡会员情况下错误选择用户对于延误航班，可获得的旅行补偿为每位乘客$50的旅行凭证导致用户无法拿回150美元金额从而用户取消预订"
-          },
-          {
-            "labeler": "KC-田凤",
-            "step": 9,
-            "original_step_id": 8,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "客服知道航班延误，且用户为银卡会员，客服凭空捏造错误政策，导致了最终结果的错误。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

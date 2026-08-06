@@ -368,79 +368,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 43,
-      "critical_error_type": "obs.IgnoreOutput",
-      "human_rationale": "客服无视了系统已查到的订单追踪号数据，错误告知用户该订单已取消、没有追踪号。"
+      "critical_error_type": "obs.IgnoreOutput"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "401",
-      "original_task_id": "retail_failed_deepseek-reasoner::cd8439cc-25c5-48b6-a71e-bb5c848e9996",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你想要退回在不同订单中收到的所有书架和拼图。请确保在开头说明你希望取消这两件商品，且它们来自不同的订单。你还想退回与吸尘器一起收到的背包。你还想将 pending 订单中的商品改为红色，并将订单地址更改为你的默认芝加哥住所（出于隐私原因你不会透露具体地址，但它在你的个人资料中）。你想获取 cancelled 订单的追踪单号。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 43,
-            "original_step_id": 42,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": "智能体此前已检索到订单 #W1154986 的数据，显示在履约信息中包含 tracking_id '286422338955'，但当用户询问该 cancelled order 的追踪号码时，智能体错误地声称由于订单是 cancelled，因此没有追踪号码。这导致 communicate check 失败。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 43,
-            "original_step_id": 42,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "gpt": [
-          {
-            "step": 43,
-            "original_step_id": 42,
-            "critical_error_type": "OBS.MisreadOutput",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 43,
-            "original_step_id": 42,
-            "error_category": [
-              "OBS",
-              "IgnoreOutput: 忽略关键返回信息"
-            ],
-            "mapped_error_type": "obs.IgnoreOutput",
-            "rationale": "智能体在先前已检索到订单的相关数据，也获得了订单号码，但当客户询问时，智能体错误地声称由于订单是 cancelled，因此没有追踪号码，导致任务完成失败。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 43,
-            "original_step_id": 42,
-            "error_category": [
-              "OBS",
-              "IgnoreOutput: 忽略关键返回信息"
-            ],
-            "mapped_error_type": "obs.IgnoreOutput",
-            "rationale": "客服无视了系统已查到的订单追踪号数据，错误告知用户该订单已取消、没有追踪号。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 43,
-            "original_step_id": 42,
-            "error_category": [
-              "OBS",
-              "IgnoreOutput: 忽略关键返回信息"
-            ],
-            "mapped_error_type": "obs.IgnoreOutput",
-            "rationale": "智能体此前已检索到订单 #W1154986 的数据，显示在履约信息中包含 tracking_id '286422338955'，但当用户询问该 cancelled order 的追踪号码时，智能体错误地声称由于订单是 cancelled，因此没有追踪号码。这导致 communicate check 失败。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

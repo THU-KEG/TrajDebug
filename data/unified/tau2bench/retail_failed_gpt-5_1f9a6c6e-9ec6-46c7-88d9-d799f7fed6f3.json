@@ -128,79 +128,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 3,
-      "critical_error_type": "plan.BadDecomposition",
-      "human_rationale": "智能体制定了一个糟糕的计划，人为地将公开产品查询置于身份验证之后，为地址更新添加了不必要的确认步骤，并提示输入尺寸偏好。"
+      "critical_error_type": "plan.BadDecomposition"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "410",
-      "original_task_id": "retail_failed_gpt-5::1f9a6c6e-9ec6-46c7-88d9-d799f7fed6f3",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你刚从佛罗里达搬到菲尼克斯。不幸的是，你的地址仍然是旧地址，你想更新它。你当前的地址应该在你最近的订单中（你可以向客服提及此事），并且你不想透露它。此外，你想知道现在最便宜的T恤价格是多少，以及你是否可以通过客服订购。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 11,
-            "original_step_id": 10,
-            "critical_error_type": "OBS.MisreadOutput",
-            "confidence": "high",
-            "rationale_short": "用户询问所有T恤中价格最低的一款的价格。产品数据显示最便宜的可选T恤为$46.66（红色、L码、棉质、V领，商品3234800602），但客服人员仅筛选了XL尺码，并报告$49.67为最低价。这导致$46.66这一所需价格未能传达给用户。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "PLAN.BadDecomposition",
-            "confidence": "high",
-            "rationale_short": "在第2步，智能体制定了一个糟糕的计划，人为地将公开产品查询置于身份验证之后，为地址更新添加了不必要的确认步骤，并提示输入尺寸偏好。这些不相关的子任务和错误指定的子目标导致智能体错过了绝对最便宜的T恤价格（$46.66），并在实际更新地址之前就耗尽了对话轮次。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 11,
-            "original_step_id": 10,
-            "critical_error_type": "OBS.IgnoreOutput",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "智能体将计划分解不当，将公开产品查询置于身份验证之后，为地址更新添加了不必要的确认步骤。大量不相关的子任务和错误指定的子目标导致智能体错过了便宜的T恤价格，在后续未能更好的实现客户要求。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "智能体制定了一个糟糕的计划，人为地将公开产品查询置于身份验证之后，为地址更新添加了不必要的确认步骤，并提示输入尺寸偏好。"
-          },
-          {
-            "labeler": "KC-杨飞雪",
-            "step": 11,
-            "original_step_id": 10,
-            "error_category": [
-              "OBS",
-              "MisreadOutput: 读错返回内容"
-            ],
-            "mapped_error_type": "obs.MisreadOutput",
-            "rationale": "客服错误理解用户意图忽略用户希望获取最低价的要求错误的将XL尺码筛选为最低价，导致用户需求偏离造成金额无法传达"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

@@ -192,79 +192,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 9,
-      "critical_error_type": "reason.MissingAssumptionCheck",
-      "human_rationale": "客服决定为新的单人预订完全复制原始预订的参数，完全无视了新乘客不需要保险，不待任何行李的条件。"
+      "critical_error_type": "reason.MissingAssumptionCheck"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "258",
-      "original_task_id": "airline_failed_qwen3-max::0c185067-6414-4f75-87fb-bac05bc133a0",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：你想为朋友预订。这应该与你当前的预订完全相同。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理为乘客 Ivan Smith 预订了 2024-05-17 从 DTW 飞往 SEA 的 one way economy 航班，航班号为 HAT097 和 HAT251，无行李，无保险。\",\n  \"justification\": \"代理成功为乘客 Ivan Smith 预订了从 DTW 飞往 SEA 的 one_way economy 航班，出发日期为 2024-05-17，航班号为 HAT097 和 HAT251。但是，该预订包含了行李和保险，这不符合特定条件 'no baggage, no insurance'。\"\n}\n{\n  \"nl_assertion\": \"代理向 gift_card_8516878 收取 $128，向 credit_card_3563913 收取 $247。\",\n  \"justification\": \"代理向礼品卡 8516878 收取了 $128，但向信用卡 3563913 收取了 $277，而非预期的 $247。因此，这一预期结果未能完全达成。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 9,
-            "original_step_id": 8,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "medium",
-            "rationale_short": "客服决定为新的单人预订完全复制原始预订的参数（2 baggages, insurance=yes），而没有根据乘客人数的不同进行调整。正确的预订本应该有0件行李且无保险，这样总价会更低（$375而非$405），支付方式分配也会不同（$128礼品卡+$247信用卡）。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 9,
-            "original_step_id": 8,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "high",
-            "rationale_short": "在第8步，代理未经核实便假设当前航班价格将与之前预订的历史价格（$299）相同。它还假设\"完全一样\"意味着盲目地为一位乘客照搬2件行李和保险，而不是在继续之前核实当前价格和适当的附加服务。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 15,
-            "original_step_id": 14,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "在第14步，智能体从当前预订复制行李和保险到新预订中，但没有验证'与当前预订完全相同'是否应当排除Ivan Smith的旅客特定附加服务。这一缺乏依据的假设导致预订包含了2件行李和保险，使总额增加到$405，并直接导致了后续的付款不匹配以及最终的错误预订。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-张军伟",
-            "step": 9,
-            "original_step_id": 8,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "客服决定为新的单人预订完全复制原始预订的参数，完全无视了新乘客不需要保险，不待任何行李的条件。"
-          },
-          {
-            "labeler": "KR-娄甜甜",
-            "step": 9,
-            "original_step_id": 8,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "智能体未经过价格核验就认为新的订单与原始订单的价格一致，就创建一个与原始订单相同的新订单，这导致后续问题的出现。"
-          },
-          {
-            "labeler": "KR-曾梦雪",
-            "step": 9,
-            "original_step_id": 8,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "未经核实新预订机票票价是否与原来票价相同"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

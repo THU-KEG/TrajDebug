@@ -224,79 +224,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 21,
-      "critical_error_type": "act.WrongTool",
-      "human_rationale": "该工具用于交换商品，却被用来移除订单物品，导致工具调用失败并错误取消了整个订单。"
+      "critical_error_type": "act.WrongTool"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "284",
-      "original_task_id": "retail_failed_deepseek-reasoner::1ae508c9-ed12-4ef2-b77f-0042b0f960eb",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你之前处于居家办公状态，订购了三件居家办公用品和一些徒步装备，以便回到西雅图的父母家远程办公并享受户外生活。但公司刚刚宣布你很快就要返岗。如果客服可以办理部分商品取消，你想退掉办公用品（你忘了具体是什么），保留徒步装备。你想知道能退回的总金额，并希望原路退回退款。如果无法部分取消，那就保留订单不再追究，但要将默认用户资料地址改为你订单中显示的西雅图父母家地址（你不想在聊天中透露该地址）。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 23,
-            "original_step_id": 22,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "在 modify_pending_order_items 调用因商品数量不匹配而失败后，代理立即 cancelled 了整个订单（包括用户明确表示希望保留的 hiking 商品），而未探索其他替代方案或就这一截然不同的操作获得用户的明确同意。预期的工作流程应涉及 modify_user_address 并可能需要重新下单，而非 full cancellation。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "ACT.WrongTool",
-            "confidence": "high",
-            "rationale_short": "代理尝试通过使用 `modify_pending_order_items` 工具并传入空列表作为新物品，从 pending 订单中移除物品。该工具严格用于交换物品，而非取消物品，这导致了一个错误，并使代理错误地取消了整个订单。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 23,
-            "original_step_id": 22,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "ACT",
-              "WrongTool: 选错工具"
-            ],
-            "mapped_error_type": "act.WrongTool",
-            "rationale": "该工具用于交换商品，却被用来移除订单物品，导致工具调用失败并错误取消了整个订单。"
-          },
-          {
-            "labeler": "KC-张军伟",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "ACT",
-              "WrongTool: 选错工具"
-            ],
-            "mapped_error_type": "act.WrongTool",
-            "rationale": "客服应该使用 cancel_pending_order 来取消那些商品。"
-          },
-          {
-            "labeler": "KC-龙明佳",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "ACT",
-              "WrongTool: 选错工具"
-            ],
-            "mapped_error_type": "act.WrongTool",
-            "rationale": "客服调用modify_pending_order_items工具时传入空的new_item_ids，操作失败后未探索替代方案，直接取消整个订单，导致用户保留徒步装备的核心诉求未被满足。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

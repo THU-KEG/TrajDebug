@@ -25,7 +25,6 @@ the tau²-bench helpers directly to stay DRY.
 from __future__ import annotations
 
 import os
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -41,20 +40,14 @@ from data_processing.schema import (
 )
 from data_processing.tau2bench import (
     _RESULT_TYPE_FITTED,
-    _RESULT_TYPE_PER_ANNOTATOR,
-    _SYSTEM_STEP_OFFSET,
     _TAG_ERROR_CATEGORY,
-    _TAG_IS_CRITICAL,
-    _TAG_RATIONALE,
     _coerce_role,
-    _collect_human_annotator_critical_steps,
     _group_by_juhe,
     _is_critical_row,
     _map_error_category,
     _row_step_id,
     _slugify_task_id,
     _tag_list,
-    _tag_text,
 )
 
 
@@ -75,73 +68,10 @@ AGENT_FRAMEWORK_DESCRIPTION = (
 )
 
 
-def _parse_model_prediction(raw: Any) -> Optional[Dict[str, Any]]:
-    """Parse an SWE-Bench-Pro model-prediction string.
-
-    The column contains either ``"-"`` (no prediction) or a string of the
-    shape::
-
-        PLAN.BadDecomposition
-        <multi-line rationale>
-
-    We return ``{"critical_error_type": "PLAN.BadDecomposition",
-    "rationale_short": "<rest>"}``. When the first line does not look like
-    ``MODULE.Subtype`` the whole blob is kept under ``"raw"`` so the
-    evaluator can still inspect it.
-    """
-    if not isinstance(raw, str):
-        return None
-    s = raw.strip()
-    if not s or s == "-":
-        return None
-    # Split off the first non-empty line.
-    first_line, sep, rest = s.partition("\n")
-    first_line = first_line.strip()
-    rest = rest.strip() or None
-    if "." in first_line and re.match(r"^[A-Za-z]+\.[A-Za-z0-9_]+", first_line):
-        # Normalise trailing punctuation / extra whitespace.
-        et_match = re.match(r"^([A-Za-z]+\.[A-Za-z0-9_]+)", first_line)
-        critical_type = et_match.group(1) if et_match else first_line
-        return {
-            "critical_error_type": critical_type,
-            "rationale_short": rest,
-        }
-    return {"raw": s}
-
-
-def _collect_model_critical_steps(
-    fitted_rows: List[Dict[str, Any]],
-    original_step_to_unified: Dict[int, int],
-    model_field: str,
-) -> List[Dict[str, Any]]:
-    """For each non-summary '拟合结果' row, if the model column parses to a
-    critical-error prediction, emit one entry."""
-    out: List[Dict[str, Any]] = []
-    for row in fitted_rows:
-        orig_sid = _row_step_id(row)
-        if orig_sid is None or orig_sid < 0:
-            continue
-        c = row.get("datasetItemContent") or {}
-        pred = _parse_model_prediction(c.get(model_field))
-        if pred is None:
-            continue
-        entry: Dict[str, Any] = {
-            "step": original_step_to_unified.get(orig_sid),
-            "original_step_id": orig_sid,
-        }
-        entry.update(pred)
-        out.append(entry)
-    out.sort(key=lambda e: (e.get("original_step_id") or 0))
-    return out
-
-
 def _build_trajectory(
     juhe: str, rows: List[Dict[str, Any]]
 ) -> Optional[UnifiedTrajectory]:
     fitted_rows = [r for r in rows if r.get("resultType") == _RESULT_TYPE_FITTED]
-    per_annotator_rows = [
-        r for r in rows if r.get("resultType") == _RESULT_TYPE_PER_ANNOTATOR
-    ]
     if not fitted_rows:
         return None
 
@@ -210,14 +140,12 @@ def _build_trajectory(
 
     # The non-summary non-system rows get unified indices 1, 2, 3, ...
     original_step_to_unified: Dict[int, int] = {}
-    skipped: List[Tuple[int, str]] = []
 
     for sid, r in other_message_rows:
         c = r.get("datasetItemContent") or {}
         role = _coerce_role(str(c.get("messages_role", "")))
         content = c.get("message_content")
         if role is None:
-            skipped.append((sid, f"unknown role {c.get('messages_role')!r}"))
             continue
         unified_messages.append(
             UnifiedMessage(
@@ -259,7 +187,6 @@ def _build_trajectory(
         )
         tags = (critical_fitted_row.get("detailLabel") or {}).get("tags") or []
         category = _tag_list(tags, _TAG_ERROR_CATEGORY)
-        rationale = _tag_text(tags, _TAG_RATIONALE).strip() or None
         error_type = _map_error_category(category)
 
         if (
@@ -268,26 +195,9 @@ def _build_trajectory(
         ):
             annotation.critical_error_step = unified_step
         annotation.critical_error_type = error_type
-        annotation.human_rationale = rationale
 
     # Every SWE-Bench-Pro trajectory shipped so far is a failed attempt.
     reward = 0
-
-    # --- Per-rater critical-step labels ------------------------------------
-    critical_step_labels: Dict[str, Any] = {
-        "claude": _collect_model_critical_steps(
-            fitted_rows, original_step_to_unified, "claude"
-        ),
-        "gemini": _collect_model_critical_steps(
-            fitted_rows, original_step_to_unified, "gemini"
-        ),
-        "gpt": _collect_model_critical_steps(
-            fitted_rows, original_step_to_unified, "gpt"
-        ),
-        "human_annotators": _collect_human_annotator_critical_steps(
-            per_annotator_rows, original_step_to_unified
-        ),
-    }
 
     # --- task_description & summary ----------------------------------------
     summary_text = ""
@@ -297,15 +207,12 @@ def _build_trajectory(
 
     task_description = _extract_user_requirement(summary_text) or summary_text
 
+    # Public releases retain only detector context. Internal grouping IDs,
+    # generated summaries, per-rater labels, and skipped-row diagnostics are
+    # intentionally excluded.
     extra: Dict[str, Any] = {
         "agent_framework_description": AGENT_FRAMEWORK_DESCRIPTION,
-        "juhe": juhe,
-        "original_task_id": task_id,
-        "summary": summary_text,
-        "critical_step_labels": critical_step_labels,
     }
-    if skipped:
-        extra["skipped_rows"] = skipped
 
     metadata = UnifiedMetadata(
         dataset=DATASET_NAME,

@@ -352,79 +352,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 27,
-      "critical_error_type": "plan.UnrealisticPlan",
-      "human_rationale": "依赖于一个不存在的功能：对往返预订的单个航段进行舱位升级。由于舱位等级是适用于整个预订的，这个计划不具备可执行性。"
+      "critical_error_type": "plan.UnrealisticPlan"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "270",
-      "original_task_id": "airline_failed_qwen3-max::b242cd29-6dc8-40dc-bf0c-815e75da0438",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：你想将预订号 HXDUBJ 中即将出发的去程航班改为第二天的直飞航班（即推迟一天）。\n\n你还想将返程航班从 SFO 推迟一天。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理将预订 HXDUBJ 更新为航班 HAT072（2024-05-19）和 HAT278（2024-05-23）。\",\n  \"justification\": \"客服人员最初提供了升级选项，并让客户确认了新的航班，但后来应客户要求将两个航班都恢复到了原来的 economy 舱位。因此，预订并未按要求更新。\"\n}\n{\n  \"nl_assertion\": \"代理不允许仅针对航班的一个航段更改为 business 舱位。\",\n  \"justification\": \"客服人员确实允许客户仅将去程航班升级为 business class，随后又确认了客户将两个航班都保持在 economy class 的决定。因此，该结果未被满足。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 29,
-            "original_step_id": 28,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "客服代表试图将两个航班都升级为 business class（cabin='business'），而客户明确要求仅将去程航班升级为 business，返程仍保持 economy。系统不支持在单次预订更新中设置混合舱位等级，因此客服代表本应认识到这一限制并告知客户，而非尝试执行一项不可能完成的操作。这导致了反复的支付失败，最终升级被彻底放弃。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 27,
-            "original_step_id": 26,
-            "critical_error_type": "PLAN.UnrealisticPlan",
-            "confidence": "high",
-            "rationale_short": "在 Step 26 中，智能体提出了一项计划，仅将 round-trip 预订中的一个航段升级到 business class，而这是 API 不支持的功能，因为 cabin class 适用于整个预订。这一不切实际的计划导致智能体随后进行了工具调用，试图升级两个航班，从而引发了余额不足错误，并最终导致任务失败。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 29,
-            "original_step_id": 28,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "high",
-            "rationale_short": "在第28步，智能体尝试通过将整个预订舱位设置为business来进行混合舱位更改，而未验证系统是否支持仅升级一个航段。这一未经检查的假设导致了后续失败的更新尝试，并且违背了不允许仅一个航段为business舱的任务约束。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "PLAN",
-              "UnrealisticPlan: 不现实计划"
-            ],
-            "mapped_error_type": "plan.UnrealisticPlan",
-            "rationale": "智能体为客户制定一个混合舱的计划，但系统不支持该功能，没有相关政策，只能为整个预订设置统一的舱位，随后智能体为实现该计划进行了工具调用，试图升级两个航班，从而引发客户余额不足问题并最终导致任务失败。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "PLAN",
-              "UnrealisticPlan: 不现实计划"
-            ],
-            "mapped_error_type": "plan.UnrealisticPlan",
-            "rationale": "依赖于一个不存在的功能：对往返预订的单个航段进行舱位升级。由于舱位等级是适用于整个预订的，这个计划不具备可执行性。"
-          },
-          {
-            "labeler": "KR-曾梦雪",
-            "step": 27,
-            "original_step_id": 26,
-            "error_category": [
-              "PLAN",
-              "UnrealisticPlan: 不现实计划"
-            ],
-            "mapped_error_type": "plan.UnrealisticPlan",
-            "rationale": "仅将去程航班升级，这个计划在当前工具和约束条件下并不可用，导致后续错误"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

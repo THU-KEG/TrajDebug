@@ -400,79 +400,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 21,
-      "critical_error_type": "obs.MisreadOutput",
-      "human_rationale": "智能体误解了之前获得的结果，将没有的数据混淆为存在的数据，从而导致后续预定的失败。"
+      "critical_error_type": "obs.MisreadOutput"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "30",
-      "original_task_id": "airline_failed_deepseek-reasoner::5ddca2a6-0c3e-43d6-919b-dbd8478a0144",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您想更改即将进行的休斯顿到丹佛行程的返程航班。\n您想将其更改为最快的返程航班，包括中转时间在内。您决定只在丹佛待几个小时，因此希望返程航班与出发行程安排在同一天。\n未满足的部分：\n{\n  \"nl_assertion\": \"客服于 May 27 将预订号 OBUT9V 的返程航班更新为 HAT290 和 HAT175。\",\n  \"justification\": \"客服人员没有将预订更新为指定的航班；相反，由于座位不可用，他们最终保留了原始航班并选择了不同的变更选项。\"\n}\n{\n  \"nl_assertion\": \"客服将支付分配给 gift_card_6276644。\",\n  \"justification\": \"代理使用信用卡而非指定的礼品卡（gift_card_6276644）处理了行李费支付，表明预期未被满足。\"\n}\n{\n  \"nl_assertion\": \"代理将预订 OBUT9V 更新为 2 件免费行李。\",\n  \"justification\": \"对话显示客服人员添加了一件额外的付费行李，使得允许的行李总数变为2件（1件付费+1件免费），但预期结果特别提到了'free baggages'，这表明存在误解。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "OBS.MisreadOutput",
-            "confidence": "high",
-            "rationale_short": "代理推荐了 Option 4 (HAT229 + HAT266) 作为最快的选项，尽管 HAT229 没有 economy 座位可用（这一点在搜索结果中已有明确显示）。这导致预订尝试失败，之后代理默默地切换到了一个慢得多的选项 (HAT084 + HAT266)，而不是正确的次快选项 (HAT290 + HAT175)。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "OBS.MisreadOutput",
-            "confidence": "high",
-            "rationale_short": "在第19步，搜索结果清楚地表明航班HAT229有0个可用的economy座位。然而，在第20步，代理误读或忽略了这些可用性数据，并错误地将其作为一个有效选项提供给用户，这后来导致预订操作失败，并导致代理做出了一个有缺陷的回退选择。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 45,
-            "original_step_id": 44,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-任净",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "OBS",
-              "MisreadOutput: 读错返回内容"
-            ],
-            "mapped_error_type": "obs.MisreadOutput",
-            "rationale": "代理忽略19步中可用性数据，并将其作为一个有效选择项提供给客户，导致预订操作失败，并导致代理做出了一个有缺陷的回退选择。"
-          },
-          {
-            "labeler": "KC-周云星",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "OBS",
-              "MisreadOutput: 读错返回内容"
-            ],
-            "mapped_error_type": "obs.MisreadOutput",
-            "rationale": "智能体误解了之前获得的结果，将没有的数据混淆为存在的数据，从而导致后续预定的失败。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "OBS",
-              "MisreadOutput: 读错返回内容"
-            ],
-            "mapped_error_type": "obs.MisreadOutput",
-            "rationale": "代理误读航班搜索结果，推荐了无经济舱座位的 HAT229 航班，导致预订失败。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

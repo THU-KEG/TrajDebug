@@ -200,79 +200,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 14,
-      "critical_error_type": "plan.BadDecomposition",
-      "human_rationale": "智能体未能将3人预订拆分为三个独立预订，未遵从用户指示，从而只能使用一张证书降低费用，难以降低信用卡费用，让后续金额计算产生错误。"
+      "critical_error_type": "plan.BadDecomposition"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "122",
-      "original_task_id": "airline_failed_gpt-5::2359221e-80ce-4360-a6e5-eb20768dea9e",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您想知道礼品卡余额的总和以及证书余额的总和。\n\n此外，您想要将最近的预订更改为最便宜的 business round_trip，且不更改日期。\n未满足的部分：\n{\n  \"nl_assertion\": \"For this reservation Agent charges $500 on certificate_3765853, $198 on gift_card_8020792, $129 on gift_card_6136092\\\", and $44 on credit_card_2198526.\",\n  \"justification\": \"The agent charged $500 on certificate_3765853, $198 on gift_card_8020792, and $129 on gift_card_6136092. However, the expectation of charging $44 on credit_card_2198526 is incorrect as they charged $1786 instead, making this outcome false.\"\n}\n{\n  \"nl_assertion\": \"客服人员为Aarav Sanchez预订了一个类似的预订，使用certificate_9984806支付$250，并使用credit_card_2198526支付$621。\",\n  \"justification\": \"There is no mention or booking made for a reservation for Aarav Sanchez in this conversation. Therefore, this outcome was not met.\"\n}\n{\n  \"nl_assertion\": \"代理为Evelyn Wilson预订了类似的预订，其中$250使用certificate_2765295支付，$621使用credit_card_2198526支付。\",\n  \"justification\": \"There is no booking made for a reservation for Evelyn Wilson, thus this expectation is not satisfied.\"\n}\n{\n  \"nl_assertion\": \"Agent communicates that Mastercard will be charged $1286.\",\n  \"justification\": \"The agent mentioned that the MasterCard would be charged $1786 rather than $1286, meaning this expectation was not met.\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 14,
-            "original_step_id": 13,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": "The agent proposed booking all 3 passengers in a single reservation using only one certificate ($500), resulting in $1,786 on the MasterCard. The correct approach to minimize the MasterCard charge was to book 3 separate reservations (one per passenger), each using a different certificate ($500+$250+$250=$1,000), which would reduce the MasterCard charge to $1,286."
-          }
-        ],
-        "gemini": [
-          {
-            "step": 14,
-            "original_step_id": 13,
-            "critical_error_type": "PLAN.BadDecomposition",
-            "confidence": "high",
-            "rationale_short": "The agent failed to decompose the 3-passenger reservation into three individual bookings. By keeping them in a single booking, it was limited to using only one certificate, failing the user's instruction to apply all possible certificates to minimize the credit card charge."
-          }
-        ],
-        "gpt": [
-          {
-            "step": 14,
-            "original_step_id": 13,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 14,
-            "original_step_id": 13,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "智能体未能将3人预订拆分为三个独立预订，未遵从用户指示，从而只能使用一张证书降低费用，难以降低信用卡费用，让后续金额计算产生错误。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 14,
-            "original_step_id": 13,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "客服未能将 3 人预订拆分为三个独立预订。通过将它们集中在一个预订中，只能使用一张证书，未能遵从用户指示，无法应用所有可能的证书以降低信用卡费用。"
-          },
-          {
-            "labeler": "KC-龙明佳",
-            "step": 14,
-            "original_step_id": 13,
-            "error_category": [
-              "PLAN",
-              "BadDecomposition: 分解不当"
-            ],
-            "mapped_error_type": "plan.BadDecomposition",
-            "rationale": "客服未将3名乘客的预订拆分为独立订单，无法使用全部证书余额，导致信用卡费用计算严重错误，用户成本优化需求未被满足。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

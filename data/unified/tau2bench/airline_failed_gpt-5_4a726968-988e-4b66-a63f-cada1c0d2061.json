@@ -192,79 +192,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 21,
-      "critical_error_type": "reason.InvalidInference",
-      "human_rationale": "智能体错误认为只有改签/取消才能提供补偿，然而拒绝了用户合理的申请。导致了最终结果的错误。"
+      "critical_error_type": "reason.InvalidInference"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "128",
-      "original_task_id": "airline_failed_gpt-5::4a726968-988e-4b66-a63f-cada1c0d2061",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：首先，尝试预订从 sf 到 ny 的航班。\n\n你将有 3 名乘客。\n\n在预订航班流程进行到一半时，突然打断并提到你想谈论其他话题，就说你对最近一次预订中的航班延误感到沮丧。\n未满足的部分：\n{\n  \"nl_assertion\": \"Agent should detect that the number of passengers on the delayed flight mentioned by the user is incorrect.\",\n  \"justification\": \"The agent initially recorded the user’s mistaken statement about the number of passengers and asked for clarification but did not question the user's claim before checking the records.\"\n}\n{\n  \"nl_assertion\": \"Agent should offer a certificate of $50.\",\n  \"justification\": \"The agent did not offer any compensation in forms of certificates or credits as per the airline's policy which states that they can only offer a travel certificate when changes or cancellations are processed due to a delay; thus, they correctly followed protocol in this instance.\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "The agent incorrectly concluded that compensation could only be offered when a reservation is changed or canceled due to a delay, fabricating a policy restriction that didn't exist. The correct action was to send a $50 travel certificate when the user asked about compensation for the 4-hour delay."
-          }
-        ],
-        "gemini": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "REASON.InvalidInference",
-            "confidence": "high",
-            "rationale_short": "The agent hallucinates a policy constraint, incorrectly concluding that compensation can only be offered if the reservation is changed or canceled. As a result, it refuses the user's valid request for a delay compensation certificate."
-          }
-        ],
-        "gpt": [
-          {
-            "step": 21,
-            "original_step_id": 20,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-任净",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "客服错误地认为只有因延误而更改或取消预订时才能提供赔偿，捏造了一个不存在的政策限制。"
-          },
-          {
-            "labeler": "KC-田凤",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "智能体错误认为只有改签/取消才能提供补偿，然而拒绝了用户合理的申请。导致了最终结果的错误。"
-          },
-          {
-            "labeler": "KC-龙明佳",
-            "step": 21,
-            "original_step_id": 20,
-            "error_category": [
-              "REASON",
-              "InvalidInference: 证据无法支撑结论"
-            ],
-            "mapped_error_type": "reason.InvalidInference",
-            "rationale": "客服错误拒绝用户的延误补偿请求，同时未识别并纠正用户提及的延误航班乘客数量错误。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

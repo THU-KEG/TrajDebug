@@ -240,63 +240,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 23,
-      "critical_error_type": "verify.PrematureTermination",
-      "human_rationale": "用户已提供换货所需信息，智能体未实际执行换货操作，提前终止了换货流程，导致任务失败。"
+      "critical_error_type": "verify.PrematureTermination"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "423",
-      "original_task_id": "retail_failed_gpt-5::ba21e203-6b2d-479e-80d9-1a3032492738",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你刚下了一个包含两块手表的订单，想要将配送地址改为你的纽约地址（你不想透露具体地址，但它在你另一个订单中）。你还想把硅胶手表换成金属款。如果有多色可选，你偏好白色。对于随运动鞋一起收到的空气净化器，你想将其更换为大尺寸且带夜间模式的款式，但仍需配备HEPA滤网。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [],
-        "gemini": [],
-        "gpt": [
-          {
-            "step": 23,
-            "original_step_id": 22,
-            "critical_error_type": "VERIFY.PrematureTermination",
-            "confidence": "high",
-            "rationale_short": "用户在请求换货并提供了足够的信息以继续处理后，助手仅描述了后续步骤并要求确认，并未实际去识别商品款式并在对话结束前完成换货。这种过早的终止导致所需的换货操作未被执行，从而造成了失败。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 23,
-            "original_step_id": 22,
-            "error_category": [
-              "VERIFY",
-              "PrematureTermination: 任务未完成即终止"
-            ],
-            "mapped_error_type": "verify.PrematureTermination",
-            "rationale": "用户已提供换货所需信息，智能体未实际执行换货操作，提前终止了换货流程，导致任务失败。"
-          },
-          {
-            "labeler": "KC-田凤",
-            "step": 23,
-            "original_step_id": 22,
-            "error_category": [
-              "VERIFY",
-              "PrematureTermination: 任务未完成即终止"
-            ],
-            "mapped_error_type": "verify.PrematureTermination",
-            "rationale": "助手在用户提供换货所需信息后，没有实际执行换货操作，仅描述步骤并请求确认，就提前结束对话，导致了换货任务没有完成。"
-          },
-          {
-            "labeler": "KC-顾凌云",
-            "step": 23,
-            "original_step_id": 22,
-            "error_category": [
-              "VERIFY",
-              "PrematureTermination: 任务未完成即终止"
-            ],
-            "mapped_error_type": "verify.PrematureTermination",
-            "rationale": "助手仅描述了后续步骤并要求确认，并未实际去识别商品款式并在对话结束前完成换货。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

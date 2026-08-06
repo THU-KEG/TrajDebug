@@ -397,9 +397,6 @@ def _build_trajectory(
     scene_policies: Dict[str, str],
 ) -> Optional[UnifiedTrajectory]:
     fitted_rows: List[Dict[str, Any]] = [r for r in rows if r.get("resultType") == _RESULT_TYPE_FITTED]
-    per_annotator_rows: List[Dict[str, Any]] = [
-        r for r in rows if r.get("resultType") == _RESULT_TYPE_PER_ANNOTATOR
-    ]
     if not fitted_rows:
         return None
 
@@ -463,14 +460,12 @@ def _build_trajectory(
     )
 
     original_step_to_unified: Dict[int, int] = {}
-    skipped: List[Tuple[int, str]] = []
 
     for sid, r in message_rows:
         c = r.get("datasetItemContent") or {}
         role = _coerce_role(str(c.get("messages_role", "")))
         content = c.get("message_content")
         if role is None:
-            skipped.append((sid, f"unknown role {c.get('messages_role')!r}"))
             continue
         unified_messages.append(
             UnifiedMessage(
@@ -505,42 +500,26 @@ def _build_trajectory(
 
         tags = (critical_fitted_row.get("detailLabel") or {}).get("tags") or []
         category = _tag_list(tags, _TAG_ERROR_CATEGORY)
-        rationale = _tag_text(tags, _TAG_RATIONALE).strip() or None
         error_type = _map_error_category(category)
 
         if isinstance(unified_step, int) and unified_messages[unified_step].role != ROLE_USER:
             annotation.critical_error_step = unified_step
         annotation.critical_error_type = error_type
-        annotation.human_rationale = rationale
 
     # Reward: failed by default; the current file only contains failed tasks.
     reward = 1 if "_success" in task_id.lower() else 0
     if reward == 1 and annotation.critical_error_step is not None:
         annotation = UnifiedAnnotation()  # schema: success -> no critical step
 
-    # --- Per-rater critical-step labels -------------------------------------
-    critical_step_labels: Dict[str, Any] = {
-        "claude": _collect_model_critical_steps(fitted_rows, original_step_to_unified, "claude"),
-        "gemini": _collect_model_critical_steps(fitted_rows, original_step_to_unified, "gemini"),
-        "gpt":    _collect_model_critical_steps(fitted_rows, original_step_to_unified, "gpt"),
-        "human_annotators": _collect_human_annotator_critical_steps(
-            per_annotator_rows, original_step_to_unified
-        ),
-    }
-
     # --- task_description ---------------------------------------------------
     task_description = _trim_scene_goal(summary_text)
 
+    # Public releases retain only detector context. Internal grouping IDs,
+    # generated summaries, per-rater labels, and skipped-row diagnostics are
+    # intentionally excluded.
     extra: Dict[str, Any] = {
         "agent_framework_description": AGENT_FRAMEWORK_DESCRIPTION,
-        "juhe": juhe,
-        "original_task_id": task_id,
-        "scene": scene,
-        "summary": summary_text,
-        "critical_step_labels": critical_step_labels,
     }
-    if skipped:
-        extra["skipped_rows"] = skipped
 
     metadata = UnifiedMetadata(
         dataset=DATASET_NAME,

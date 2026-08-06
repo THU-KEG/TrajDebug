@@ -216,79 +216,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 3,
-      "critical_error_type": "reason.MissingAssumptionCheck",
-      "human_rationale": "客服虚构了一项商店政策，声称换货只能换成不同款式，不当引导客户申请退货，而不是通过换货更换靴子。"
+      "critical_error_type": "reason.MissingAssumptionCheck"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "483",
-      "original_task_id": "retail_failed_gpt-5::e8770864-f461-4281-8484-5a48e1de43a5",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：您收到的登山靴看起来像是已经被穿过的，您对此感到不满，想要申请一双规格相同的新靴子。您还想将拼图换成一个更精美的主题，片数减少500块。但您希望保持相同的难度级别。\n未满足的部分：\n{\n  \"nl_assertion\": \"坐席应当为两个订单调换商品。\",\n  \"justification\": \"客服人员按照客户要求成功为拼图发起了换货，确认了换货事宜，并表示现有拼图需要退回。然而，客户仅要求退回登山靴而非换货，因此严格来说，客服人员并未满足对两个订单商品都进行换货的期望，因为靴子是被退回而非换货。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "high",
-            "rationale_short": "客服人员误以为换货只能是更换同款产品的不同选项，于是告知顾客需要对登山靴办理退货。实际上，系统支持用完全相同的 item_id 进行换货（换一双全新的），这才是预期的操作。这一错误假设导致系统处理了退货而非换货，造成任务失败。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 3,
-            "original_step_id": 2,
-            "critical_error_type": "others",
-            "confidence": "high",
-            "rationale_short": "客服人员虚构了一项商店政策，声称换货只能换成不同款式，不当引导客户申请退货，而不是通过换货更换靴子。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 16,
-            "original_step_id": 15,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-张军伟",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "客服虚构了一项商店政策，声称换货只能换成不同款式，不当引导客户申请退货，而不是通过换货更换靴子。"
-          },
-          {
-            "labeler": "KC-田凤",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "客服虚构了换货只能换不同款式的商店政策，直接引导用户走了退货流程，没有执行正确的换货操作。"
-          },
-          {
-            "labeler": "KC-顾凌云",
-            "step": 3,
-            "original_step_id": 2,
-            "error_category": [
-              "REASON",
-              "MissingAssumptionCheck: 关键假设未检验"
-            ],
-            "mapped_error_type": "reason.MissingAssumptionCheck",
-            "rationale": "错误假设导致退货。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

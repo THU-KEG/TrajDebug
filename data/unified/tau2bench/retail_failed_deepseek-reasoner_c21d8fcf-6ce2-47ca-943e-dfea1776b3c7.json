@@ -256,79 +256,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 15,
-      "critical_error_type": "plan.WrongOrder",
-      "human_rationale": "智能体在处理订单修改任务时，未先收集订单的详细信息，直接让用户从纯 ID 列表中选择订单，跳过了关键的前置步骤，导致用户无法有效识别订单，后续操作存在选错订单的风险。"
+      "critical_error_type": "plan.WrongOrder"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "295",
-      "original_task_id": "retail_failed_deepseek-reasoner::c21d8fcf-6ce2-47ca-943e-dfea1776b3c7",
-      "scene": "retail",
-      "summary": "场景：零售\n用户目的：你犯了个错误，把订单寄到了你儿子在华盛顿特区的地址，你想把它改为你夏洛特的默认地址（你不想主动提及，但客服可以在你的用户资料中查到），因为他要回家了。你还想调整台灯为黑色，背包改为中号和聚酯材料。如果背包有多种颜色可选，你更倾向于灰色。如果客服询问支付方式，你一开始说 gift card，但当客服要求你在继续操作前确认时，你改变主意决定使用 PayPal，同时也决定只修改背包。确保你在最开始简短地同时提及这两件事，但先提及修改商品，再提及地址。\n未满足的部分：\n（无）",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 19,
-            "original_step_id": 18,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "medium",
-            "rationale_short": "客服人员展示了订单 #W7032009 的详细信息，显示配送地址已经是用户的家庭住址（159 Hickory Lane, Charlotte, NC 28243）。当用户随后表示地址被\"设置为我儿子的住处\"并需要更改为他们的家庭住址时，客服人员应该注意到这一不一致之处，并质疑这是否是正确的订单。正确的订单是 #W5270061，客服人员未能核实这一点导致所有修改都被应用到了错误的订单上。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 15,
-            "original_step_id": 14,
-            "critical_error_type": "PLAN.WrongOrder",
-            "confidence": "high",
-            "rationale_short": "智能体要求用户从一份原始订单ID列表中选择订单，却事先没有获取这些订单的详细信息，即使用户明确说明他们搞混了订单号。智能体本应先收集订单详情，以便识别正确的订单或向用户提供有意义的摘要。这种过早的操作导致用户模拟器选择了错误的订单，进而使得后续所有更新都被错误地应用。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 17,
-            "original_step_id": 16,
-            "critical_error_type": "REASON.MissingAssumptionCheck",
-            "confidence": "high",
-            "rationale_short": "在第16步，智能体接受了用户选择的订单#W7032009，但没有核实这确实是需要修改的订单。用户曾表示当前地址是其儿子的住所，但检索到的订单档案中已有家庭住址记录；这种未经核实的假设导致智能体修改了错误的订单，之后还声称地址修改已完成。"
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-任净",
-            "step": 15,
-            "original_step_id": 14,
-            "error_category": [
-              "PLAN",
-              "WrongOrder: 步骤顺序错误"
-            ],
-            "mapped_error_type": "plan.WrongOrder",
-            "rationale": "智能体应该先手机订单详情，以便识别正确的订单或者向用户提供有意义的摘要。"
-          },
-          {
-            "labeler": "KC-周云星",
-            "step": 15,
-            "original_step_id": 14,
-            "error_category": [
-              "PLAN",
-              "WrongOrder: 步骤顺序错误"
-            ],
-            "mapped_error_type": "plan.WrongOrder",
-            "rationale": "智能体应事先获取用户订单的详细信息后，再让客户从中选择订单，这样即便客户搞混了订单号，智能体也能识别正确的订单或向用户提供有意义的信息，但智能体先前的操作使得后续所有更新都被错误地应用，导致未能完成客户要求。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 15,
-            "original_step_id": 14,
-            "error_category": [
-              "PLAN",
-              "WrongOrder: 步骤顺序错误"
-            ],
-            "mapped_error_type": "plan.WrongOrder",
-            "rationale": "智能体在处理订单修改任务时，未先收集订单的详细信息，直接让用户从纯 ID 列表中选择订单，跳过了关键的前置步骤，导致用户无法有效识别订单，后续操作存在选错订单的风险。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }

@@ -184,79 +184,10 @@
     "reward": 0,
     "annotation": {
       "critical_error_step": 16,
-      "critical_error_type": "plan.WrongOrder",
-      "human_rationale": "客服人员本不应该对预订进行任何更改。尽管客户已确认，但正确的做法是拒绝这些修改。客服人员在第15步继续更新了预订航班，这是第一个不可逆的操作，也是失败的根本原因。"
+      "critical_error_type": "plan.WrongOrder"
     },
     "extra": {
-      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available.",
-      "juhe": "146",
-      "original_task_id": "airline_failed_gpt-5::e5c652d0-f6ab-4d40-8745-37e5a201a1fe",
-      "scene": "airline",
-      "summary": "场景：航空\n用户目的：您希望将预订号 HXDUBJ 中即将出发的航班改为第二天的直飞航班（即推迟一天）。\n\n您还希望将从 SFO 返程的时间推迟一天，将舱位改为 business class，并添加 2 件托运行李。\n未满足的部分：\n{\n  \"nl_assertion\": \"代理不应进行任何更改。\",\n  \"justification\": \"客户确认并授权了对其预订的更改，包括升级到商务舱和修改航班日期，代理已成功处理了这些更改。\"\n}",
-      "critical_step_labels": {
-        "claude": [
-          {
-            "step": 16,
-            "original_step_id": 15,
-            "critical_error_type": "REASON.WrongChoice",
-            "confidence": "medium",
-            "rationale_short": "客服人员本不应该对预订进行任何更改。尽管客户已确认，但正确的做法是拒绝这些修改。客服人员在第15步继续更新了预订航班，这是第一个不可逆的操作，也是失败的根本原因。"
-          }
-        ],
-        "gemini": [
-          {
-            "step": 16,
-            "original_step_id": 15,
-            "critical_error_type": "PLAN.WrongOrder",
-            "confidence": "high",
-            "rationale_short": "用户要求翻译一段英文文本。让我分析一下原文：\n\n原文：\"The user's authorization to make changes in step 14 was explicitly conditional on confirming a false premise about their insurance waiving change fees ('can you confirm that?'). The agent executed the database changes in step 15 before correcting the user's misunderstanding and obtaining final, unambiguous consent, violating the required logical sequence.\"\n\n需要保留的内容：\n- step 14（步骤14）\n- step 15（步骤15）\n- 'can you confirm that?'（引号内的内容应该保留或翻译？根据规则2，\"枚举值和状态值\"等需要保留，但这里是引用的对话内容。规则1说\"只翻译自然语言文本\"。这句对话是自然语言，应该翻译，但引号格式保持。不过看上下文，这像是系统记录的特定对话内容，可能需要保留原文？让我再看规则...规则2说\"以下内容必须原样保留\"，然后列举了专有标识符、枚举值、URL等。'can you confirm that?' 看起来是示例对话，不是专有标识符。但规则1说\"只翻译自然语言文本\"，这意味着引号内的内容如果是自然语言也应该翻译。\n\n再仔细看规则1：\"只翻译自然语言文本（英文句子、段落、说明性文字）。\"\n规则2：\"以下内容必须原样保留\"包括专有标识符、枚举值、状态值、URL、数字、Markdown格式等。\n\n'can you confirm that?' 是一段引用的对话，属于自然语言文本，应该翻译成中文。但是，如果这是特定界面文本或需要精确对应原文的引用，可能需要保留。不过根据规则，自然语言应该翻译。\n\n让我重新思考：文本中的('can you confirm that?') 看起来是在引用第14步中的具体措辞。作为专业翻译，我应该将其翻译为中文，因为这是自然语言内容，不是技术标识符。\n\n等等，我需要更仔细地理解上下文。这似乎是在描述一个客服流程或数据库操作审计日志。引号内的内容 'can you confirm that?' 是用户或客服在第14步中的具体措辞。\n\n根据规则：\n1. 只翻译自然语言文本 - 所以 'can you confirm that?' 应该翻译\n2. 专有标识符、枚举值等保留 - 这不属于那些类别\n\n所以翻译应该是：\"你能确认这一点吗？\" 或类似。\n\n让我完整翻译：\n\n\"The user's authorization to make changes in step 14 was explicitly conditional on confirming a false premise about their insurance waiving change fees ('can you confirm that?').\"\n\n翻译：用户在第14步中进行更改的授权明确以确认一个错误前提为条件，即他们的保险免除变更费用（\"你能确认这一点吗？\"）。\n\n\"The agent executed the database changes in step 15 before correcting the user's misunderstanding and obtaining final, unambiguous consent, violating the required logical sequence.\"\n\n翻译：客服代表在第15步执行了数据库更改，然后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。\n\n等等，我需要检查术语：\n- authorization: 授权\n- explicitly conditional on: 明确以...为条件\n- false premise: 错误前提\n- insurance waiving change fees: 保险免除变更费用\n- agent: 客服代表/代理（在客服上下文中通常指客服代表）\n- executed: 执行\n- database changes: 数据库更改\n- correcting: 纠正\n- misunderstanding: 误解\n- final, unambiguous consent: 最终、明确的同意\n- violating: 违反\n- required logical sequence: 所需的逻辑顺序\n\n再检查格式：\n- step 14: 第14步（保留数字）\n- step 15: 第15步（保留数字）\n- 引号: 保持引号格式\n\n让我优化一下流畅度：\n\n\"用户在第14步中获得的更改授权，明确以确认一个错误前提为条件——即他们的保险会免除变更费用（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改，然后才纠正用户的误解并获得最终、明确的同意，这违反了所需的逻辑顺序。\"\n\n或者：\n\n\"用户在第14步同意进行更改的授权，明确以确认一个关于其保险免除变更费用的错误前提为条件（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改之后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。\"\n\n再调整：\n\n\"用户在第14步中做出的更改授权，明确以确认一个错误前提为条件——即其保险会免除变更费用（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改，然后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。\"\n\n关于 'can you confirm that?' 的翻译：\n如果这是系统记录的精确文本，可能需要保留英文。但规则说只翻译自然语言文本。而且规则2列举的保留项中不包括这种对话引用。所以应该翻译。\n\n但让我再想想...如果这是审计报告，引用的是特定对话内容，有时为了精确性会保留原文。不过用户明确要求\"只翻译自然语言文本\"，这意味着所有自然语言都应该翻译成中文。\n\n最终决定：翻译引号内的内容。\n\n完整翻译：\n\"用户在第14步中同意进行更改的授权，明确以确认一个错误前提为条件——即其保险会免除变更费用（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。\"\n\n或者更流畅：\n\"用户在第14步中授予的更改授权，明确以确认一个错误前提为条件——即其保险可免除变更费用（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改，然后才纠正用户的误解并获得最终、明确的同意，这违反了所需的逻辑顺序。\"\n\n我选择：\n\"用户在第14步中同意进行更改的授权明确以确认一个错误前提为条件，即其保险会免除变更费用（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。\"\n\n等等，我需要更仔细地处理 \"authorization to make changes\"。这里是\"进行更改的授权\"。\n\n再看 \"explicitly conditional on confirming a false premise\"，意思是\"明确以确认一个错误前提为条件\"。\n\n关于 \"waiving change fees\"：waive 是\"免除\"，change fees 是\"变更费用\"。\n\n关于 \"the agent\"：在客服上下文中，agent 通常翻译为\"客服代表\"或\"座席\"。\n\n让我最终确定：\n\n用户在第14步中同意进行更改的授权明确以确认一个错误前提为条件，即其保险会免除变更费用（\"你能确认这一点吗？\"）。客服代表在第15步执行了数据库更改后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。\n\n或者保留单引号：\n用户在第14步中同意进行更改的授权明确以确认一个错误前提为条件，即其保险会免除变更费用（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。\n\n原文用的是单引号，我应该保持单引号。\n\n最终检查：\n- step 14 -> 第14步 ✓\n- step 15 -> 第15步 ✓\n- 'can you confirm that?' -> '你能确认这一点吗？' ✓\n- 格式保持 ✓\n- 自然语言翻译 ✓\n- 专业术语准确 ✓\n\n看起来不错。用户在第14步中同意进行更改的授权明确以确认一个错误前提为条件，即其保险会免除变更费用（'你能确认这一点吗？'）。客服代表在第15步执行了数据库更改后才纠正用户的误解并获得最终、明确的同意，违反了所需的逻辑顺序。"
-          }
-        ],
-        "gpt": [
-          {
-            "step": 16,
-            "original_step_id": 15,
-            "critical_error_type": "ACT.WrongActionSequence",
-            "confidence": "high",
-            "rationale_short": null
-          }
-        ],
-        "human_annotators": [
-          {
-            "labeler": "KC-周云星",
-            "step": 16,
-            "original_step_id": 15,
-            "error_category": [
-              "REASON",
-              "WrongChoice: 明显错误的决策"
-            ],
-            "mapped_error_type": "reason.WrongChoice",
-            "rationale": "智能体根据政策本不应对预订进行任何更改，但在客户授权与要求下却更新了预订航班，这是失败的根本原因。"
-          },
-          {
-            "labeler": "KC-姚讯怡",
-            "step": 16,
-            "original_step_id": 15,
-            "error_category": [
-              "PLAN",
-              "WrongOrder: 步骤顺序错误"
-            ],
-            "mapped_error_type": "plan.WrongOrder",
-            "rationale": "客服搞反了流程，没先纠正用户的误会、拿到同意，就先把航班给改了，导致后面没法补救，任务直接失败。"
-          },
-          {
-            "labeler": "KC-杨船",
-            "step": 16,
-            "original_step_id": 15,
-            "error_category": [
-              "PLAN",
-              "WrongOrder: 步骤顺序错误"
-            ],
-            "mapped_error_type": "plan.WrongOrder",
-            "rationale": "客服人员本不应该对预订进行任何更改。尽管客户已确认，但正确的做法是拒绝这些修改。客服人员在第15步继续更新了预订航班，这是第一个不可逆的操作，也是失败的根本原因。"
-          }
-        ]
-      }
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
     }
   }
 }
