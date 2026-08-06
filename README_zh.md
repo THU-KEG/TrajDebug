@@ -48,7 +48,7 @@ detector 输入为 `data/unified/<dataset>/` 下每条轨迹一个 JSON：
 | `tau2bench` | 400 |
 | `swebenchpro` | 86 |
 
-其中 400 条 τ²-Bench 与 86 条 SWE-Bench Pro 失败轨迹组成 TRAJERRBENCH。构建已注册数据集：
+论文中提出的 **TRAJERRBENCH** 数据集在本仓库中对应 [`data/unified/tau2bench`](data/unified/tau2bench)（400 条 τ²-Bench 失败轨迹）和 [`data/unified/swebenchpro`](data/unified/swebenchpro)（86 条 SWE-Bench Pro 失败轨迹）。构建已注册数据集：
 
 ```bash
 python -m data_processing.build_unified_dataset --all
@@ -93,7 +93,7 @@ bash run_pipeline.sh
 ```bash
 DETECTOR_MODEL=your-model bash run_pipeline.sh
 
-DATASETS="tau2bench swebenchpo" \
+DATASETS="tau2bench swebenchpro" \
 FILE_CONCURRENCY=2 \
 LLM_CONCURRENCY=8 \
 DETECTOR_MODEL=your-model \

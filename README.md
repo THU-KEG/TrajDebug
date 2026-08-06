@@ -49,7 +49,7 @@ Detector inputs are one JSON file per trajectory under `data/unified/<dataset>/`
 | `tau2bench` | 400 |
 | `swebenchpro` | 86 |
 
-TRAJERRBENCH comprises the 400 τ²-Bench and 86 SWE-Bench Pro failed trajectories. Build registered datasets with:
+The **TRAJERRBENCH** dataset introduced in the paper is released in this repository as [`data/unified/tau2bench`](data/unified/tau2bench) (400 τ²-Bench failed trajectories) and [`data/unified/swebenchpro`](data/unified/swebenchpro) (86 SWE-Bench Pro failed trajectories). Build registered datasets with:
 
 ```bash
 python -m data_processing.build_unified_dataset --all
