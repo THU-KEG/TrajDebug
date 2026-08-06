@@ -95,7 +95,7 @@ bash run_pipeline.sh
 DETECTOR_MODEL=your-model bash run_pipeline.sh
 
 # Select datasets or tune concurrency:
-DATASETS="alfworld gaia webshop" \
+DATASETS="tau2bench swebenchpro" \
 FILE_CONCURRENCY=2 \
 LLM_CONCURRENCY=8 \
 DETECTOR_MODEL=your-model \
