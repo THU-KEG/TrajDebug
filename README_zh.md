@@ -93,7 +93,7 @@ bash run_pipeline.sh
 ```bash
 DETECTOR_MODEL=your-model bash run_pipeline.sh
 
-DATASETS="alfworld gaia webshop" \
+DATASETS="tau2bench swebenchpo" \
 FILE_CONCURRENCY=2 \
 LLM_CONCURRENCY=8 \
 DETECTOR_MODEL=your-model \
