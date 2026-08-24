@@ -1,0 +1,201 @@
+{
+  "messages": [
+    {
+      "step": 0,
+      "role": "system",
+      "content": "# 零售代理政策\n\n作为一名零售代理，你可以帮助用户：\n\n- **取消或修改待处理订单**\n- **退回或更换已交付订单**\n- **修改其默认用户地址**\n- **提供关于其个人资料、订单及相关产品的信息**\n\n在对话开始时，你必须通过电子邮件查找用户ID，或通过姓名 + 邮政编码来验证用户身份。即使用户已经提供了用户ID，也必须执行此操作。\n\n一旦用户通过验证，你可以为用户提供关于订单、产品、个人资料的信息，例如帮助用户查询订单ID。\n\n每次对话中你只能帮助一个用户（但可以处理同一用户的多个请求），并且必须拒绝与任何其他用户相关的任务请求。\n\n在执行任何更新数据库的操作（取消、修改、退货、换货）之前，你必须列出操作细节，并获得用户明确确认（yes）后才能继续。\n\n你不应编造用户或工具未提供的任何信息、知识或流程，也不应提供主观建议或评论。\n\n你每次最多只能调用一个工具；如果你调用了工具，就不应同时向用户回复；如果你向用户回复，就不应同时调用工具。\n\n你应拒绝违反本政策的用户请求。\n\n只有当请求无法在你的操作范围内处理时，才应将用户转接给人工客服。转接时，首先调用工具 transfer_to_human_agents，然后向用户发送消息：“YOU ARE BEING TRANSFERRED TO A HUMAN AGENT. PLEASE HOLD ON.”\n\n## 基本领域说明\n\n- 数据库中的所有时间均为 EST（美国东部时间）且使用24小时制。例如，“02:30:00”表示东部时间凌晨2点30分。\n\n### 用户\n\n每个用户都有一个包含以下内容的个人资料：\n\n- 唯一用户ID\n- 电子邮件\n- 默认地址\n- 支付方式\n\n共有三种支付方式：**礼品卡**、**PayPal账户**、**信用卡**。\n\n### 产品\n\n我们的零售商店有50种产品类型。\n\n对于每一种**产品类型**，都有不同**选项**的**变体商品**。\n\n例如，对于“T恤”产品，可能有“蓝色 M码”的变体商品，也可能有“红色 L码”的变体商品。\n\n每个产品具有以下属性：\n\n- 唯一产品ID\n- 名称\n- 变体列表\n\n每个变体商品具有以下属性：\n\n- 唯一商品ID\n- 该商品选项值的信息\n- 库存情况\n- 价格\n\n注意：产品ID和商品ID没有关联，不应混淆！\n\n### 订单\n\n每个订单具有以下属性：\n\n- 唯一订单ID\n- 用户ID\n- 地址\n- 已订购的商品\n- 状态\n- 履约信息（追踪ID和商品ID）\n- 支付历史\n\n订单状态可以是：**待处理（pending）**、**已处理（processed）**、**已交付（delivered）**或**已取消（cancelled）**。\n\n订单还可以根据已执行的操作具有其他可选属性（例如取消原因、更换的商品、差价等）。\n\n## 通用操作规则\n\n通常，你只能对“待处理”或“已交付”的订单执行操作。\n\n更换或修改订单的工具每个订单只能调用一次！在调用工具之前，务必将所有需要更改的商品整理成列表。\n\n## 取消待处理订单\n\n只有当订单状态为“待处理”时才能取消订单，在执行操作前应检查其状态。\n\n用户需要确认订单ID以及取消原因（仅限“no longer needed（不再需要）”或“ordered by mistake（误下单）”）。其他原因不被接受。\n\n在用户确认后，订单状态将变为“已取消”，如果原支付方式为礼品卡，则立即退款；否则将在5至7个工作日内退款。\n\n## 修改待处理订单\n\n只有当订单状态为“待处理”时才能修改订单，在执行操作前应检查其状态。\n\n对于待处理订单，你可以修改收货地址、支付方式或商品选项，但不能修改其他内容。\n\n### 修改支付方式\n\n用户只能选择一种不同于原支付方式的单一支付方式。\n\n如果用户希望改为使用礼品卡，则礼品卡余额必须足以覆盖总金额。\n\n在用户确认后，订单状态仍保持为“待处理”。如果原支付方式为礼品卡，则立即退款；否则将在5至7个工作日内退款。\n\n### 修改商品\n\n此操作每个订单只能调用一次，并将订单状态更改为“待处理（商品已修改）”。之后将无法再次修改或取消订单。因此在执行此操作前必须确认所有细节正确无误，尤其要提醒客户确认是否已提供所有需要修改的商品。\n\n对于待处理订单，每个商品只能修改为同一产品的其他可用选项变体，不能更换产品类型（例如不能将衬衫改为鞋子）。\n\n用户必须提供一种支付方式用于支付或接收差价。如果提供礼品卡，则其余额必须足以覆盖差价。\n\n## 退回已交付订单\n\n只有当订单状态为“已交付”时才能退货，在执行操作前应检查其状态。\n\n用户需要确认订单ID以及要退回的商品列表。\n\n用户需要提供一种支付方式用于接收退款。\n\n退款必须退回原支付方式，或退回到已有的礼品卡。\n\n在用户确认后，订单状态将变为“退货请求已提交”，用户将收到一封关于如何退回商品的电子邮件。\n\n## 更换已交付订单\n\n只有当订单状态为“已交付”时才能更换商品，在执行操作前应检查其状态。特别需要提醒客户确认是否已提供所有需要更换的商品。\n\n对于已交付订单，每个商品只能更换为同一产品的其他可用选项变体，不能更换产品类型（例如不能将衬衫改为鞋子）。\n\n用户必须提供一种支付方式用于支付或接收差价。如果提供礼品卡，则其余额必须足以覆盖差价。\n\n在用户确认后，订单状态将变为“换货请求已提交”，用户将收到一封关于如何退回商品的电子邮件。无需重新下单。",
+      "name": "system",
+      "judgable": false,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 1,
+      "role": "assistant",
+      "content": "你好！今天有什么可以帮您的吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 2,
+      "role": "user",
+      "content": "你好！我刚搬到Elm Avenue的新家，还在Houston这里。我发现最近有一个订单被错误地寄到了我的旧地址，所以需要将该订单更新到我的新地址。另外，能否请你将我账户中的默认地址更改为新地址？处理完这些之后，我还想商量一下把刚买的平板电脑换成更便宜的型号，因为搬家开销很大。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 3,
+      "role": "assistant",
+      "content": "我很乐意帮您更新送货地址并处理平板电脑的换货！首先让我验证您的账户，这样我就能访问您的订单和个人资料信息。\n\n为了查找您的账户，请提供您的电子邮件地址好吗？或者，如果您手边没有电子邮件，我可以用您的名字、姓氏和邮政编码来搜索。\n\n一旦我能访问您的账户，我将能够：\n1. 将您 pending 的订单更新到您在休斯顿 Elm Avenue 的新地址\n2. 更改您个人资料中的默认地址\n3. 帮您将平板电脑换成一个更实惠的型号\n\n请提供您的电子邮件地址或者您的姓名和邮政编码来开始好吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 4,
+      "role": "user",
+      "content": "当然，我的邮箱是 sophia.martin4832@example.com。请在查到我的信息后告诉我，这样我们就可以更新最近的订单和我的默认地址了。然后我们可以商量把平板电脑换成更便宜的款式。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 5,
+      "role": "assistant",
+      "content": "[tool_calls]\n- find_user_id_by_email({\"email\": \"sophia.martin4832@example.com\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 6,
+      "role": "tool",
+      "content": "sophia_martin_8570",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 7,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_user_details({\"user_id\": \"sophia_martin_8570\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 8,
+      "role": "tool",
+      "content": "{\"user_id\": \"sophia_martin_8570\", \"name\": {\"first_name\": \"Sophia\", \"last_name\": \"Martin\"}, \"address\": {\"address1\": \"760 Elm Avenue\", \"address2\": \"Suite 564\", \"city\": \"Houston\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"77034\"}, \"email\": \"sophia.martin4832@example.com\", \"payment_methods\": {\"credit_card_5694100\": {\"source\": \"credit_card\", \"id\": \"credit_card_5694100\", \"brand\": \"mastercard\", \"last_four\": \"3292\"}}, \"orders\": [\"#W1603792\", \"#W1092119\"]}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 9,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_order_details({\"order_id\": \"#W1603792\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 10,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W1603792\", \"user_id\": \"sophia_martin_8570\", \"address\": {\"address1\": \"760 Elm Avenue\", \"address2\": \"Suite 564\", \"city\": \"Houston\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"77034\"}, \"items\": [{\"name\": \"Bicycle\", \"product_id\": \"9783735446\", \"item_id\": \"5606522780\", \"price\": 1902.67, \"options\": {\"frame size\": \"large\", \"color\": \"red\", \"type\": \"mountain\"}}, {\"name\": \"Grill\", \"product_id\": \"6819683148\", \"item_id\": \"1120917161\", \"price\": 953.39, \"options\": {\"type\": \"electric\", \"size\": \"portable\", \"features\": \"none\"}}, {\"name\": \"Headphones\", \"product_id\": \"6992792935\", \"item_id\": \"5635439102\", \"price\": 353.76, \"options\": {\"type\": \"over-ear\", \"connectivity\": \"wired\", \"color\": \"blue\"}}, {\"name\": \"Pet Bed\", \"product_id\": \"2747247837\", \"item_id\": \"4537595158\", \"price\": 193.79, \"options\": {\"size\": \"small\", \"material\": \"fleece\", \"color\": \"brown\"}}, {\"name\": \"Tablet\", \"product_id\": \"8024098596\", \"item_id\": \"6501071631\", \"price\": 1018.68, \"options\": {\"screen size\": \"7-inch\", \"storage\": \"32GB\", \"color\": \"gold\"}}], \"status\": \"pending\", \"fulfillments\": [], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 4422.29, \"payment_method_id\": \"credit_card_5694100\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 11,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_product_details({\"product_id\": \"8024098596\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 12,
+      "role": "tool",
+      "content": "{\"name\": \"Tablet\", \"product_id\": \"8024098596\", \"variants\": {\"3788616824\": {\"item_id\": \"3788616824\", \"options\": {\"screen size\": \"10-inch\", \"storage\": \"128GB\", \"color\": \"black\"}, \"available\": false, \"price\": 951.21}, \"2235648106\": {\"item_id\": \"2235648106\", \"options\": {\"screen size\": \"10-inch\", \"storage\": \"32GB\", \"color\": \"black\"}, \"available\": true, \"price\": 1054.43}, \"7535423717\": {\"item_id\": \"7535423717\", \"options\": {\"screen size\": \"8-inch\", \"storage\": \"128GB\", \"color\": \"silver\"}, \"available\": false, \"price\": 904.46}, \"2106335193\": {\"item_id\": \"2106335193\", \"options\": {\"screen size\": \"10-inch\", \"storage\": \"64GB\", \"color\": \"silver\"}, \"available\": true, \"price\": 903.95}, \"6501071631\": {\"item_id\": \"6501071631\", \"options\": {\"screen size\": \"7-inch\", \"storage\": \"32GB\", \"color\": \"gold\"}, \"available\": true, \"price\": 1018.68}, \"2633090267\": {\"item_id\": \"2633090267\", \"options\": {\"screen size\": \"7-inch\", \"storage\": \"64GB\", \"color\": \"silver\"}, \"available\": false, \"price\": 1046.33}, \"4803681337\": {\"item_id\": \"4803681337\", \"options\": {\"screen size\": \"8-inch\", \"storage\": \"64GB\", \"color\": \"black\"}, \"available\": false, \"price\": 962.34}, \"6065192424\": {\"item_id\": \"6065192424\", \"options\": {\"screen size\": \"8-inch\", \"storage\": \"128GB\", \"color\": \"gold\"}, \"available\": true, \"price\": 989.7}, \"7187199153\": {\"item_id\": \"7187199153\", \"options\": {\"screen size\": \"8-inch\", \"storage\": \"128GB\", \"color\": \"black\"}, \"available\": false, \"price\": 983.62}, \"4913411651\": {\"item_id\": \"4913411651\", \"options\": {\"screen size\": \"7-inch\", \"storage\": \"128GB\", \"color\": \"black\"}, \"available\": true, \"price\": 941.03}, \"8551474201\": {\"item_id\": \"8551474201\", \"options\": {\"screen size\": \"8-inch\", \"storage\": \"64GB\", \"color\": \"silver\"}, \"available\": false, \"price\": 938.92}, \"4615543240\": {\"item_id\": \"4615543240\", \"options\": {\"screen size\": \"7-inch\", \"storage\": \"32GB\", \"color\": \"silver\"}, \"available\": true, \"price\": 1042.93}, \"6948061616\": {\"item_id\": \"6948061616\", \"options\": {\"screen size\": \"10-inch\", \"storage\": \"128GB\", \"color\": \"gold\"}, \"available\": true, \"price\": 950.96}, \"4131464125\": {\"item_id\": \"4131464125\", \"options\": {\"screen size\": \"10-inch\", \"storage\": \"128GB\", \"color\": \"silver\"}, \"available\": false, \"price\": 960.67}}}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 13,
+      "role": "assistant",
+      "content": "太好了！我已找到您的账户，可以看到您最近的订单 #W1603792 目前处于 pending 状态。我看到您当前的地址已显示为 760 Elm Avenue, Suite 564, Houston, TX 77034 —— 这是您要使用的新地址吗？\n\n关于平板电脑更换，我看到您目前拥有一台 7-inch、32GB、gold 的平板电脑，价格为 $1,018.68。查看可用的更便宜选项后，我找到了：\n\n- 7-inch、128GB、black 平板电脑：$941.03（节省 $77.65）\n- 8-inch、128GB、gold 平板电脑：$989.70（节省 $28.98）\n- 10-inch、64GB、silver 平板电脑：$903.95（节省 $114.73）\n- 10-inch、128GB、gold 平板电脑：$950.96（节省 $67.72）\n\n在我继续更新您的地址和处理平板电脑更换之前，请您确认：\n\n1. 760 Elm Avenue, Suite 564, Houston, TX 77034 是您正确的新地址吗？\n2. 您想更换为哪款平板电脑？\n\n一旦您确认这些详细信息，我就可以更新您的默认地址，并为您的 pending 订单处理平板电脑更换。",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 14,
+      "role": "user",
+      "content": "是的，没错——760 Elm Avenue, Suite 564, Houston, TX 77034 是我的新住址。请继续更新我的 pending 订单和默认地址到这个地址。\n\n关于平板换货，我想选择最便宜的选项，看起来是那款 10-inch、64GB 的银色平板，价格为 $903.95。你能帮我换成那款吗？如果你还需要我提供其他信息，请告诉我！",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 15,
+      "role": "assistant",
+      "content": "[tool_calls]\n- modify_user_address({\"user_id\": \"sophia_martin_8570\", \"address1\": \"760 Elm Avenue\", \"address2\": \"Suite 564\", \"city\": \"Houston\", \"state\": \"TX\", \"country\": \"USA\", \"zip\": \"77034\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 16,
+      "role": "tool",
+      "content": "{\"user_id\": \"sophia_martin_8570\", \"name\": {\"first_name\": \"Sophia\", \"last_name\": \"Martin\"}, \"address\": {\"address1\": \"760 Elm Avenue\", \"address2\": \"Suite 564\", \"city\": \"Houston\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"77034\"}, \"email\": \"sophia.martin4832@example.com\", \"payment_methods\": {\"credit_card_5694100\": {\"source\": \"credit_card\", \"id\": \"credit_card_5694100\", \"brand\": \"mastercard\", \"last_four\": \"3292\"}}, \"orders\": [\"#W1603792\", \"#W1092119\"]}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 17,
+      "role": "assistant",
+      "content": "完美！我已成功将您的默认地址更新为 760 Elm Avenue, Suite 564, Houston, TX 77034。\n\n现在处理您状态为 pending 的订单 #W1603792 中的平板更换事宜：\n\n**更换详情：**\n- 当前平板：7英寸、32GB金色平板 - $1,018.68\n- 新平板：10英寸、64GB银色平板 - $903.95\n- 差价：您将收到 $114.73 的退款\n- 支付方式：您尾号为 3292 的信用卡\n\n**重要提醒：**每个订单只能进行一次此类修改，完成更改后，订单状态将变为 \"pending (items modified)\"，届时您将无法再进行其他修改或取消订单。请确认您希望继续进行此次更换，并且您已提供所有想要修改的商品。\n\n您是否确认要继续进行此次平板更换？请回复 \"yes\" 以继续。",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 18,
+      "role": "user",
+      "content": "是的，我确认要将平板电脑更换为10英寸、64GB银色型号。地址和修改内容都正确无误。感谢您的帮助！",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 19,
+      "role": "assistant",
+      "content": "[tool_calls]\n- modify_pending_order_items({\"order_id\": \"#W1603792\", \"item_ids\": [\"6501071631\"], \"new_item_ids\": [\"2106335193\"], \"payment_method_id\": \"credit_card_5694100\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 20,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W1603792\", \"user_id\": \"sophia_martin_8570\", \"address\": {\"address1\": \"760 Elm Avenue\", \"address2\": \"Suite 564\", \"city\": \"Houston\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"77034\"}, \"items\": [{\"name\": \"Bicycle\", \"product_id\": \"9783735446\", \"item_id\": \"5606522780\", \"price\": 1902.67, \"options\": {\"frame size\": \"large\", \"color\": \"red\", \"type\": \"mountain\"}}, {\"name\": \"Grill\", \"product_id\": \"6819683148\", \"item_id\": \"1120917161\", \"price\": 953.39, \"options\": {\"type\": \"electric\", \"size\": \"portable\", \"features\": \"none\"}}, {\"name\": \"Headphones\", \"product_id\": \"6992792935\", \"item_id\": \"5635439102\", \"price\": 353.76, \"options\": {\"type\": \"over-ear\", \"connectivity\": \"wired\", \"color\": \"blue\"}}, {\"name\": \"Pet Bed\", \"product_id\": \"2747247837\", \"item_id\": \"4537595158\", \"price\": 193.79, \"options\": {\"size\": \"small\", \"material\": \"fleece\", \"color\": \"brown\"}}, {\"name\": \"Tablet\", \"product_id\": \"8024098596\", \"item_id\": \"2106335193\", \"price\": 903.95, \"options\": {\"screen size\": \"10-inch\", \"storage\": \"64GB\", \"color\": \"silver\"}}], \"status\": \"pending (item modified)\", \"fulfillments\": [], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 4422.29, \"payment_method_id\": \"credit_card_5694100\"}, {\"transaction_type\": \"refund\", \"amount\": 114.7299999999999, \"payment_method_id\": \"credit_card_5694100\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 21,
+      "role": "assistant",
+      "content": "太好了！我已成功处理您的平板换货并更新了订单。以下是完成事项的摘要：\n\n✅ **默认地址已更新**：您的个人资料现在显示 760 Elm Avenue, Suite 564, Houston, TX 77034 作为您的默认地址\n\n✅ **平板换货已完成**：\n- 原商品：7-inch, 32GB 金色平板 ($1,018.68)\n- 更换为：10-inch, 64GB 银色平板 ($903.95)\n- **退款已处理**：$114.73 已退还至您尾号为 3292 的信用卡\n\n您的订单 #W1603792 目前状态为 \"pending (item modified)\"，将配送到您在 Elm Avenue 的新地址。退款将在 5-7 个工作日内处理至您的信用卡。\n\n今天还有其他我可以帮您的吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 22,
+      "role": "user",
+      "content": "不用了，我需要处理的事情就这些！非常感谢您帮忙处理地址更新和平板电脑更换事宜。祝您今天愉快！\n\n###STOP###",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    }
+  ],
+  "metadata": {
+    "dataset": "tau2bench",
+    "task_id": "retail_failed_deepseek-reasoner::11c9cb4f-e05e-4bbc-a156-147bd710936e",
+    "task_description": "场景：零售\n用户目的：你住在休斯顿的 Elm Avenue，最近你搬到了同一条街上的新房子，并购买了一台平板电脑寄到那里。但你意识到你还有另一个订单寄到了旧地址，并且你想将这个错误订单的地址更改为新家，同时将你的用户默认地址也更改为新家。你不想透露你的地址，并坚持客服应该能在订单中查到它。由于搬家费用，你还想将你的平板电脑换成最便宜的那款。",
+    "reward": 0,
+    "annotation": {
+      "critical_error_step": 9,
+      "critical_error_type": "plan.BadDecomposition"
+    },
+    "extra": {
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
+    }
+  }
+}

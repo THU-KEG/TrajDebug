@@ -1,0 +1,169 @@
+{
+  "messages": [
+    {
+      "step": 0,
+      "role": "system",
+      "content": "# 航空代理政策\n\n当前时间为 2024-05-15 15:00:00 EST。\n\n作为一名航空代理，你可以帮助用户**预订**、**修改**或**取消**航班预订。你还负责处理**退款和补偿**。\n\n在执行任何会更新预订数据库的操作（预订、修改航班、编辑行李、更改舱位或更新乘客信息）之前，你必须列出操作详情，并获得用户的明确确认（yes）后才能继续。\n\n你不应提供任何不来自用户或可用工具的信息、知识或流程，也不应给出主观推荐或评论。\n\n你每次只能进行一次工具调用；如果你进行了工具调用，就不应同时回复用户。如果你回复了用户，就不应同时进行工具调用。\n\n你应拒绝任何违反本政策的用户请求。\n\n只有当请求超出你的处理范围时，你才应将用户转接给人工客服。转接时，先调用 transfer_to_human_agents 工具，然后向用户发送消息：“YOU ARE BEING TRANSFERRED TO A HUMAN AGENT. PLEASE HOLD ON.”\n\n## 领域基础\n\n### 用户\n每个用户都有一个包含以下信息的个人资料：\n- 用户 ID\n- 电子邮箱\n- 地址\n- 出生日期\n- 支付方式\n- 会员等级\n- 预订编号\n\n共有三种支付方式：**信用卡**、**礼品卡**、**旅行凭证**。\n\n共有三种会员等级：**普通会员**、**银卡会员**、**金卡会员**。\n\n### 航班\n每个航班具有以下属性：\n- 航班号\n- 出发地\n- 目的地\n- 计划起飞和到达时间（当地时间）\n\n一个航班可以在多个日期提供服务。对于每个日期：\n- 如果状态为**可用（available）**，则航班尚未起飞，并列出可用座位和价格。\n- 如果状态为**延误（delayed）**或**准点（on time）**，则航班尚未起飞，但不可预订。\n- 如果状态为**飞行中（flying）**，则航班已起飞但尚未降落，不可预订。\n\n共有三种舱位等级：**基础经济舱（basic economy）**、**经济舱（economy）**、**商务舱（business）**。**基础经济舱**是独立舱位，与**经济舱**完全不同。\n\n每种舱位都会列出座位可用情况和价格。\n\n### 预订\n每个预订包含以下信息：\n- 预订 ID\n- 用户 ID\n- 行程类型\n- 航班\n- 乘客\n- 支付方式\n- 创建时间\n- 行李\n- 旅行保险信息\n\n行程类型有两种：**单程（one way）**和**往返（round trip）**。\n\n## 预订航班\n\n代理必须首先从用户处获取用户 ID。\n\n然后询问行程类型、出发地和目的地。\n\n舱位：\n- 同一预订中的所有航班必须使用相同的舱位等级。\n\n乘客：\n- 每个预订最多可包含五名乘客。\n- 代理需要收集每位乘客的名字、姓氏和出生日期。\n- 所有乘客必须乘坐相同的航班并在同一舱位。\n\n支付：\n- 每个预订最多可使用一张旅行凭证、一张信用卡和三张礼品卡。\n- 旅行凭证的剩余金额不可退款。\n- 出于安全原因，所有支付方式必须已存在于用户资料中。\n\n托运行李额度：\n- 如果预订用户是普通会员：\n  - 每位基础经济舱乘客免费托运行李 0 件\n  - 每位经济舱乘客免费托运行李 1 件\n  - 每位商务舱乘客免费托运行李 2 件\n- 如果预订用户是银卡会员：\n  - 每位基础经济舱乘客免费托运行李 1 件\n  - 每位经济舱乘客免费托运行李 2 件\n  - 每位商务舱乘客免费托运行李 3 件\n- 如果预订用户是金卡会员：\n  - 每位基础经济舱乘客免费托运行李 2 件\n  - 每位经济舱乘客免费托运行李 3 件\n  - 每位商务舱乘客免费托运行李 4 件\n- 每件额外行李收费 50 美元。\n\n不要添加用户不需要的托运行李。\n\n旅行保险：\n- 代理应询问用户是否需要购买旅行保险。\n- 旅行保险费用为每位乘客 30 美元，在因健康或天气原因取消航班时可获得全额退款。\n\n## 修改航班\n\n首先，代理必须获取用户 ID 和预订 ID。\n- 用户必须提供其用户 ID。\n- 如果用户不知道预订 ID，代理应使用可用工具帮助查找。\n\n更改航班：\n- 基础经济舱航班不可修改。\n- 其他预订可以在不改变出发地、目的地和行程类型的情况下修改。\n- 某些航段可以保留，但其价格不会根据当前价格更新。\n- API 不会检查这些规则，因此代理必须在调用 API 前确保规则适用！\n\n更改舱位：\n- 如果预订中的任何航班已经飞行，则不能更改舱位。\n- 在其他情况下，所有预订（包括基础经济舱）都可以在不更改航班的情况下更改舱位。\n- 同一预订中的所有航班必须保持相同舱位；不能只更改单个航段的舱位。\n- 如果更改后价格高于原价，用户需要支付差额。\n- 如果更改后价格低于原价，应向用户退还差额。\n\n更改行李和保险：\n- 用户可以增加但不能减少托运行李。\n- 用户不能在初始预订后添加保险。\n\n更改乘客：\n- 用户可以修改乘客信息，但不能更改乘客数量。\n- 即使是人工客服也不能更改乘客数量。\n\n支付：\n- 如果更改了航班，用户需要提供一张礼品卡或信用卡作为支付或退款方式，该支付方式必须已存在于用户资料中。\n\n## 取消航班\n\n首先，代理必须获取用户 ID 和预订 ID。\n- 用户必须提供其用户 ID。\n- 如果用户不知道预订 ID，代理应使用可用工具帮助查找。\n\n代理还必须获取取消原因（行程变更、航空公司取消航班或其他原因）。\n\n如果航班的任何部分已经飞行，代理无法处理，需要转接人工。\n\n否则，在以下任一情况下可以取消航班：\n- 预订是在过去 24 小时内完成的\n- 航班由航空公司取消\n- 为商务舱航班\n- 用户购买了旅行保险且取消原因在保险覆盖范围内\n\nAPI 不会检查取消规则，因此代理必须在调用 API 前确保规则适用！\n\n退款：\n- 退款将在 5 到 7 个工作日内退回至原支付方式。\n\n## 退款和补偿\n除非用户明确要求，否则不要主动提供补偿。\n\n如果用户是普通会员、没有旅行保险且乘坐（基础）经济舱，则不提供补偿。\n\n在提供补偿前必须确认事实。\n\n仅当用户为银卡/金卡会员，或有旅行保险，或乘坐商务舱时才可提供补偿。\n\n- 如果用户投诉预订中的航班被取消，在确认事实后，代理可以提供每位乘客 100 美元的凭证作为补偿。\n\n- 如果用户投诉预订中的航班延误并希望更改或取消预订，在确认事实并完成更改或取消后，代理可以提供每位乘客 50 美元的凭证作为补偿。\n\n除上述情况外，不得因其他原因提供补偿。",
+      "name": "system",
+      "judgable": false,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 1,
+      "role": "assistant",
+      "content": "你好！今天有什么可以帮您的吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 2,
+      "role": "user",
+      "content": "您好！我需要帮助更改即将出发的航班。我已有一个预订，希望将去程航班改为比原计划晚一天的直飞选项。另外，我想调整返程航班，使其从SFO提前一天出发。您能协助处理吗？",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 3,
+      "role": "assistant",
+      "content": "我很乐意帮您修改航班预订！为了协助您更改航班，我需要先了解一些信息：\n\n1. **您的用户ID** - 这是访问您预订详情所必需的\n2. **您的预订ID** - 如果您不知道此项，我可以使用您的用户ID帮您查找\n\n获取这些信息后，我可以：\n- 查询您当前的预订详情\n- 为您搜索新首选日期的可用直飞航班\n- 根据您的要求协助修改去程和返程航班\n\n请提供您的用户ID，以便我们开始处理好吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 4,
+      "role": "user",
+      "content": "好的，我的用户ID是 yara_garcia_1905。预订ID是 HXDUBJ。如果您还需要其他信息，请告诉我！",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 5,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_reservation_details({\"reservation_id\": \"HXDUBJ\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 6,
+      "role": "tool",
+      "content": "{\"reservation_id\": \"HXDUBJ\", \"user_id\": \"yara_garcia_1905\", \"origin\": \"IAH\", \"destination\": \"SFO\", \"flight_type\": \"round_trip\", \"cabin\": \"economy\", \"flights\": [{\"flight_number\": \"HAT085\", \"origin\": \"IAH\", \"destination\": \"JFK\", \"date\": \"2024-05-18\", \"price\": 177}, {\"flight_number\": \"HAT023\", \"origin\": \"JFK\", \"destination\": \"SFO\", \"date\": \"2024-05-18\", \"price\": 146}, {\"flight_number\": \"HAT278\", \"origin\": \"SFO\", \"destination\": \"IAH\", \"date\": \"2024-05-22\", \"price\": 180}], \"passengers\": [{\"first_name\": \"Yara\", \"last_name\": \"Garcia\", \"dob\": \"1974-08-15\"}], \"payment_history\": [{\"payment_id\": \"gift_card_6941833\", \"amount\": 533}], \"created_at\": \"2024-05-04T06:04:48\", \"total_baggages\": 0, \"nonfree_baggages\": 0, \"insurance\": \"yes\", \"status\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 7,
+      "role": "assistant",
+      "content": "[tool_calls]\n- search_direct_flight({\"origin\": \"IAH\", \"destination\": \"SFO\", \"date\": \"2024-05-19\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 8,
+      "role": "tool",
+      "content": "[{\"flight_number\": \"HAT072\", \"origin\": \"IAH\", \"destination\": \"SFO\", \"status\": \"available\", \"scheduled_departure_time_est\": \"09:00:00\", \"scheduled_arrival_time_est\": \"13:00:00\", \"date\": null, \"available_seats\": {\"basic_economy\": 18, \"economy\": 9, \"business\": 9}, \"prices\": {\"basic_economy\": 68, \"economy\": 130, \"business\": 282}}, {\"flight_number\": \"HAT180\", \"origin\": \"IAH\", \"destination\": \"SFO\", \"status\": \"available\", \"scheduled_departure_time_est\": \"07:00:00\", \"scheduled_arrival_time_est\": \"11:00:00\", \"date\": null, \"available_seats\": {\"basic_economy\": 4, \"economy\": 17, \"business\": 15}, \"prices\": {\"basic_economy\": 65, \"economy\": 130, \"business\": 346}}]",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 9,
+      "role": "assistant",
+      "content": "[tool_calls]\n- search_direct_flight({\"origin\": \"SFO\", \"destination\": \"IAH\", \"date\": \"2024-05-21\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 10,
+      "role": "tool",
+      "content": "[{\"flight_number\": \"HAT082\", \"origin\": \"SFO\", \"destination\": \"IAH\", \"status\": \"available\", \"scheduled_departure_time_est\": \"23:00:00\", \"scheduled_arrival_time_est\": \"03:00:00+1\", \"date\": null, \"available_seats\": {\"basic_economy\": 18, \"economy\": 13, \"business\": 1}, \"prices\": {\"basic_economy\": 68, \"economy\": 192, \"business\": 470}}, {\"flight_number\": \"HAT278\", \"origin\": \"SFO\", \"destination\": \"IAH\", \"status\": \"available\", \"scheduled_departure_time_est\": \"16:00:00\", \"scheduled_arrival_time_est\": \"20:00:00\", \"date\": null, \"available_seats\": {\"basic_economy\": 18, \"economy\": 8, \"business\": 12}, \"prices\": {\"basic_economy\": 66, \"economy\": 174, \"business\": 257}}]",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 11,
+      "role": "assistant",
+      "content": "我找到了您当前的预订以及针对您请求更改的一些可用航班选项。以下是我找到的：\n\n**当前预订：**\n- 去程：May 18 - HAT085 (IAH→JFK) + HAT023 (JFK→SFO) - one-stop\n- 返程：May 22 - HAT278 (SFO→IAH) - direct\n\n**针对您新日期的可用 nonstop 选项：**\n\n**去程 (May 19)：**\n- HAT072：IAH→SFO，9:00 AM 起飞，$130 economy\n- HAT180：IAH→SFO，7:00 AM 起飞，$130 economy\n\n**返程 (May 21)：**\n- HAT082：SFO→IAH，11:00 PM 起飞，$192 economy  \n- HAT278：SFO→IAH，4:00 PM 起飞，$174 economy\n\n您是否希望继续更改您的航班至：\n- 去程：May 19，nonstop 航班（请指定具体选择：HAT072 或 HAT180）\n- 返程：May 21，nonstop 航班（请指定具体选择：HAT082 或 HAT278）\n\n请确认您偏好哪些具体航班，我将继续进行修改。",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 12,
+      "role": "user",
+      "content": "去程航班我想选择 HAT072，日期为5月19日，因为它在上午9:00起飞。返程航班我更喜欢 HAT278，日期为5月21日，起飞时间为下午4:00。\n\n请继续为我做出这些更改。我还想说一下，我有保险应该可以支付变更费——我在你们的网站上看到过，所以我希望这些费用能被免除。你能确认一下吗？",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 13,
+      "role": "assistant",
+      "content": "我可以帮您将航班更改为：\n- 去程：HAT072，May 19（9:00 AM 起飞，IAH→SFO）\n- 返程：HAT278，May 21（4:00 PM 起飞，SFO→IAH）\n\n关于您的保险保障，我可以确认您确实在此预订中购买了旅行保险。但是，我需要澄清的是，虽然旅行保险可能涵盖因健康或天气原因取消的取消费用，但通常不涵盖自愿变更航班的费用。您购买的保险主要用于取消保护。\n\n在我继续办理航班变更之前，我需要告知您，由于您要变更到不同日期、不同航班，很可能需要支付票价差额。新航班的定价与您原始预订不同。\n\n为了完成修改，我还需要您从个人资料中提供一种支付方式（信用卡或礼品卡）来支付任何票价差额。能否请提供您想使用的 payment ID？\n\n一旦您确认了支付方式，我将继续更新您的预订。",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 14,
+      "role": "user",
+      "content": "我理解您的意思，但我希望您能再次核实一下贵公司的政策。我在贵司网站上看到，如果购买了综合旅行保险（我确实购买了），自愿变更的费用是可以豁免的。我在预订前非常仔细地阅读了这些细则。\n\n能否请您再次核实或将此请求升级处理？我期望改签费用能够被免除，也希望贵司能按所述政策执行。票价差额我会使用原支付方式支付，但我不想支付任何改签费用。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 15,
+      "role": "assistant",
+      "content": "[tool_calls]\n- transfer_to_human_agents({\"summary\": \"Customer yara_garcia_1905 with reservation HXDUBJ wants to change flights from May 18-22 to May 19-21. Customer claims comprehensive travel insurance should waive change fees based on website information, but agent's policy documentation only mentions insurance covering cancellations for health/weather reasons. Customer requesting verification of insurance coverage for change fee waivers.\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 16,
+      "role": "tool",
+      "content": "Transfer successful",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 17,
+      "role": "assistant",
+      "content": "正在为您转接人工客服。请稍候。",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 18,
+      "role": "user",
+      "content": "###TRANSFER###",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    }
+  ],
+  "metadata": {
+    "dataset": "tau2bench",
+    "task_id": "airline_failed_deepseek-reasoner::9b7f0019-9e0c-4612-8fc7-8bcf8140ffe6",
+    "task_description": "场景：航空\n用户目的：你想将预订号 HXDUBJ 中即将出发的去程航班改为第二天的直飞航班（即推迟一天）。\n\n你还想将返程航班从 SFO 推迟一天。",
+    "reward": 0,
+    "annotation": {
+      "critical_error_step": 13,
+      "critical_error_type": "reason.MissingAssumptionCheck"
+    },
+    "extra": {
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
+    }
+  }
+}

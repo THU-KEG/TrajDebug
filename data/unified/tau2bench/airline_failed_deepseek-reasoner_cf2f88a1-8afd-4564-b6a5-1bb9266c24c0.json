@@ -1,0 +1,201 @@
+{
+  "messages": [
+    {
+      "step": 0,
+      "role": "system",
+      "content": "# 航空代理政策\n\n当前时间为 2024-05-15 15:00:00 EST。\n\n作为一名航空代理，你可以帮助用户**预订**、**修改**或**取消**航班预订。你还负责处理**退款和补偿**。\n\n在执行任何会更新预订数据库的操作（预订、修改航班、编辑行李、更改舱位或更新乘客信息）之前，你必须列出操作详情，并获得用户的明确确认（yes）后才能继续。\n\n你不应提供任何不来自用户或可用工具的信息、知识或流程，也不应给出主观推荐或评论。\n\n你每次只能进行一次工具调用；如果你进行了工具调用，就不应同时回复用户。如果你回复了用户，就不应同时进行工具调用。\n\n你应拒绝任何违反本政策的用户请求。\n\n只有当请求超出你的处理范围时，你才应将用户转接给人工客服。转接时，先调用 transfer_to_human_agents 工具，然后向用户发送消息：“YOU ARE BEING TRANSFERRED TO A HUMAN AGENT. PLEASE HOLD ON.”\n\n## 领域基础\n\n### 用户\n每个用户都有一个包含以下信息的个人资料：\n- 用户 ID\n- 电子邮箱\n- 地址\n- 出生日期\n- 支付方式\n- 会员等级\n- 预订编号\n\n共有三种支付方式：**信用卡**、**礼品卡**、**旅行凭证**。\n\n共有三种会员等级：**普通会员**、**银卡会员**、**金卡会员**。\n\n### 航班\n每个航班具有以下属性：\n- 航班号\n- 出发地\n- 目的地\n- 计划起飞和到达时间（当地时间）\n\n一个航班可以在多个日期提供服务。对于每个日期：\n- 如果状态为**可用（available）**，则航班尚未起飞，并列出可用座位和价格。\n- 如果状态为**延误（delayed）**或**准点（on time）**，则航班尚未起飞，但不可预订。\n- 如果状态为**飞行中（flying）**，则航班已起飞但尚未降落，不可预订。\n\n共有三种舱位等级：**基础经济舱（basic economy）**、**经济舱（economy）**、**商务舱（business）**。**基础经济舱**是独立舱位，与**经济舱**完全不同。\n\n每种舱位都会列出座位可用情况和价格。\n\n### 预订\n每个预订包含以下信息：\n- 预订 ID\n- 用户 ID\n- 行程类型\n- 航班\n- 乘客\n- 支付方式\n- 创建时间\n- 行李\n- 旅行保险信息\n\n行程类型有两种：**单程（one way）**和**往返（round trip）**。\n\n## 预订航班\n\n代理必须首先从用户处获取用户 ID。\n\n然后询问行程类型、出发地和目的地。\n\n舱位：\n- 同一预订中的所有航班必须使用相同的舱位等级。\n\n乘客：\n- 每个预订最多可包含五名乘客。\n- 代理需要收集每位乘客的名字、姓氏和出生日期。\n- 所有乘客必须乘坐相同的航班并在同一舱位。\n\n支付：\n- 每个预订最多可使用一张旅行凭证、一张信用卡和三张礼品卡。\n- 旅行凭证的剩余金额不可退款。\n- 出于安全原因，所有支付方式必须已存在于用户资料中。\n\n托运行李额度：\n- 如果预订用户是普通会员：\n  - 每位基础经济舱乘客免费托运行李 0 件\n  - 每位经济舱乘客免费托运行李 1 件\n  - 每位商务舱乘客免费托运行李 2 件\n- 如果预订用户是银卡会员：\n  - 每位基础经济舱乘客免费托运行李 1 件\n  - 每位经济舱乘客免费托运行李 2 件\n  - 每位商务舱乘客免费托运行李 3 件\n- 如果预订用户是金卡会员：\n  - 每位基础经济舱乘客免费托运行李 2 件\n  - 每位经济舱乘客免费托运行李 3 件\n  - 每位商务舱乘客免费托运行李 4 件\n- 每件额外行李收费 50 美元。\n\n不要添加用户不需要的托运行李。\n\n旅行保险：\n- 代理应询问用户是否需要购买旅行保险。\n- 旅行保险费用为每位乘客 30 美元，在因健康或天气原因取消航班时可获得全额退款。\n\n## 修改航班\n\n首先，代理必须获取用户 ID 和预订 ID。\n- 用户必须提供其用户 ID。\n- 如果用户不知道预订 ID，代理应使用可用工具帮助查找。\n\n更改航班：\n- 基础经济舱航班不可修改。\n- 其他预订可以在不改变出发地、目的地和行程类型的情况下修改。\n- 某些航段可以保留，但其价格不会根据当前价格更新。\n- API 不会检查这些规则，因此代理必须在调用 API 前确保规则适用！\n\n更改舱位：\n- 如果预订中的任何航班已经飞行，则不能更改舱位。\n- 在其他情况下，所有预订（包括基础经济舱）都可以在不更改航班的情况下更改舱位。\n- 同一预订中的所有航班必须保持相同舱位；不能只更改单个航段的舱位。\n- 如果更改后价格高于原价，用户需要支付差额。\n- 如果更改后价格低于原价，应向用户退还差额。\n\n更改行李和保险：\n- 用户可以增加但不能减少托运行李。\n- 用户不能在初始预订后添加保险。\n\n更改乘客：\n- 用户可以修改乘客信息，但不能更改乘客数量。\n- 即使是人工客服也不能更改乘客数量。\n\n支付：\n- 如果更改了航班，用户需要提供一张礼品卡或信用卡作为支付或退款方式，该支付方式必须已存在于用户资料中。\n\n## 取消航班\n\n首先，代理必须获取用户 ID 和预订 ID。\n- 用户必须提供其用户 ID。\n- 如果用户不知道预订 ID，代理应使用可用工具帮助查找。\n\n代理还必须获取取消原因（行程变更、航空公司取消航班或其他原因）。\n\n如果航班的任何部分已经飞行，代理无法处理，需要转接人工。\n\n否则，在以下任一情况下可以取消航班：\n- 预订是在过去 24 小时内完成的\n- 航班由航空公司取消\n- 为商务舱航班\n- 用户购买了旅行保险且取消原因在保险覆盖范围内\n\nAPI 不会检查取消规则，因此代理必须在调用 API 前确保规则适用！\n\n退款：\n- 退款将在 5 到 7 个工作日内退回至原支付方式。\n\n## 退款和补偿\n除非用户明确要求，否则不要主动提供补偿。\n\n如果用户是普通会员、没有旅行保险且乘坐（基础）经济舱，则不提供补偿。\n\n在提供补偿前必须确认事实。\n\n仅当用户为银卡/金卡会员，或有旅行保险，或乘坐商务舱时才可提供补偿。\n\n- 如果用户投诉预订中的航班被取消，在确认事实后，代理可以提供每位乘客 100 美元的凭证作为补偿。\n\n- 如果用户投诉预订中的航班延误并希望更改或取消预订，在确认事实并完成更改或取消后，代理可以提供每位乘客 50 美元的凭证作为补偿。\n\n除上述情况外，不得因其他原因提供补偿。",
+      "name": "system",
+      "judgable": false,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 1,
+      "role": "assistant",
+      "content": "你好！今天有什么可以帮您的吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 2,
+      "role": "user",
+      "content": "你好，我有一次即将从纽约到芝加哥的行程，想对预订做一些更改。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 3,
+      "role": "assistant",
+      "content": "我很乐意帮助您更改即将到来的从纽约到芝加哥的行程。为了协助您修改预订，我需要先了解一些详细信息：\n\n1. 您的用户ID\n2. 您的预订号\n\n如果您手头没有预订号，我可以使用您的用户ID帮您查找。\n\n您能提供一下您的用户ID吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 4,
+      "role": "user",
+      "content": "好的，我的用户ID是 omar_rossi_1241。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 5,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_user_details({\"user_id\": \"omar_rossi_1241\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 6,
+      "role": "tool",
+      "content": "{\"user_id\": \"omar_rossi_1241\", \"name\": {\"first_name\": \"Omar\", \"last_name\": \"Rossi\"}, \"address\": {\"address1\": \"901 Pine Lane\", \"address2\": \"Suite 360\", \"city\": \"Houston\", \"country\": \"USA\", \"state\": \"TX\", \"zip\": \"77271\"}, \"email\": \"omar.rossi5980@example.com\", \"dob\": \"1970-06-06\", \"payment_methods\": {\"gift_card_8190333\": {\"source\": \"gift_card\", \"id\": \"gift_card_8190333\", \"amount\": 280.0}, \"credit_card_6754990\": {\"source\": \"credit_card\", \"id\": \"credit_card_6754990\", \"brand\": \"mastercard\", \"last_four\": \"3848\"}, \"certificate_8390038\": {\"source\": \"certificate\", \"id\": \"certificate_8390038\", \"amount\": 150.0}, \"certificate_1778167\": {\"source\": \"certificate\", \"id\": \"certificate_1778167\", \"amount\": 250.0}, \"gift_card_6490722\": {\"source\": \"gift_card\", \"id\": \"gift_card_6490722\", \"amount\": 127.0}, \"credit_card_7407366\": {\"source\": \"credit_card\", \"id\": \"credit_card_7407366\", \"brand\": \"visa\", \"last_four\": \"6437\"}}, \"saved_passengers\": [{\"first_name\": \"Liam\", \"last_name\": \"Lee\", \"dob\": \"1989-08-12\"}], \"membership\": \"gold\", \"reservations\": [\"UM3OG5\", \"5RJ7UH\", \"FQ8APE\", \"QKRY03\"]}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 7,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_reservation_details({\"reservation_id\": \"UM3OG5\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 8,
+      "role": "tool",
+      "content": "{\"reservation_id\": \"UM3OG5\", \"user_id\": \"omar_rossi_1241\", \"origin\": \"SEA\", \"destination\": \"DFW\", \"flight_type\": \"round_trip\", \"cabin\": \"economy\", \"flights\": [{\"flight_number\": \"HAT113\", \"origin\": \"SEA\", \"destination\": \"DFW\", \"date\": \"2024-05-26\", \"price\": 117}, {\"flight_number\": \"HAT282\", \"origin\": \"DFW\", \"destination\": \"ATL\", \"date\": \"2024-05-28\", \"price\": 140}, {\"flight_number\": \"HAT239\", \"origin\": \"ATL\", \"destination\": \"SEA\", \"date\": \"2024-05-28\", \"price\": 158}], \"passengers\": [{\"first_name\": \"Omar\", \"last_name\": \"Rossi\", \"dob\": \"1970-06-06\"}, {\"first_name\": \"Liam\", \"last_name\": \"Lee\", \"dob\": \"1989-08-12\"}], \"payment_history\": [{\"payment_id\": \"gift_card_8190333\", \"amount\": 830}], \"created_at\": \"2024-05-08T14:32:07\", \"total_baggages\": 0, \"nonfree_baggages\": 0, \"insurance\": \"no\", \"status\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 9,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_reservation_details({\"reservation_id\": \"5RJ7UH\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 10,
+      "role": "tool",
+      "content": "{\"reservation_id\": \"5RJ7UH\", \"user_id\": \"omar_rossi_1241\", \"origin\": \"LAX\", \"destination\": \"SFO\", \"flight_type\": \"round_trip\", \"cabin\": \"economy\", \"flights\": [{\"flight_number\": \"HAT034\", \"origin\": \"LAX\", \"destination\": \"SFO\", \"date\": \"2024-05-26\", \"price\": 165}, {\"flight_number\": \"HAT163\", \"origin\": \"SFO\", \"destination\": \"LAX\", \"date\": \"2024-05-29\", \"price\": 190}], \"passengers\": [{\"first_name\": \"Omar\", \"last_name\": \"Rossi\", \"dob\": \"1970-06-06\"}, {\"first_name\": \"Isabella\", \"last_name\": \"Anderson\", \"dob\": \"1956-06-24\"}], \"payment_history\": [{\"payment_id\": \"credit_card_7407366\", \"amount\": 710}], \"created_at\": \"2024-05-11T02:58:29\", \"total_baggages\": 1, \"nonfree_baggages\": 0, \"insurance\": \"no\", \"status\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 11,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_reservation_details({\"reservation_id\": \"FQ8APE\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 12,
+      "role": "tool",
+      "content": "{\"reservation_id\": \"FQ8APE\", \"user_id\": \"omar_rossi_1241\", \"origin\": \"EWR\", \"destination\": \"ORD\", \"flight_type\": \"one_way\", \"cabin\": \"basic_economy\", \"flights\": [{\"flight_number\": \"HAT056\", \"origin\": \"EWR\", \"destination\": \"IAH\", \"date\": \"2024-05-25\", \"price\": 71}, {\"flight_number\": \"HAT138\", \"origin\": \"IAH\", \"destination\": \"ORD\", \"date\": \"2024-05-25\", \"price\": 60}], \"passengers\": [{\"first_name\": \"Ivan\", \"last_name\": \"Garcia\", \"dob\": \"1960-12-01\"}], \"payment_history\": [{\"payment_id\": \"gift_card_8190333\", \"amount\": 161}], \"created_at\": \"2024-05-01T16:18:10\", \"total_baggages\": 0, \"nonfree_baggages\": 0, \"insurance\": \"yes\", \"status\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 13,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_reservation_details({\"reservation_id\": \"QKRY03\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 14,
+      "role": "tool",
+      "content": "{\"reservation_id\": \"QKRY03\", \"user_id\": \"omar_rossi_1241\", \"origin\": \"MCO\", \"destination\": \"DTW\", \"flight_type\": \"one_way\", \"cabin\": \"basic_economy\", \"flights\": [{\"flight_number\": \"HAT214\", \"origin\": \"MCO\", \"destination\": \"PHX\", \"date\": \"2024-05-24\", \"price\": 84}, {\"flight_number\": \"HAT265\", \"origin\": \"PHX\", \"destination\": \"DTW\", \"date\": \"2024-05-25\", \"price\": 90}], \"passengers\": [{\"first_name\": \"Omar\", \"last_name\": \"Rossi\", \"dob\": \"1970-06-06\"}, {\"first_name\": \"Liam\", \"last_name\": \"Lee\", \"dob\": \"1989-08-12\"}], \"payment_history\": [{\"payment_id\": \"gift_card_6490722\", \"amount\": 408}], \"created_at\": \"2024-05-10T20:04:24\", \"total_baggages\": 0, \"nonfree_baggages\": 0, \"insurance\": \"yes\", \"status\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 15,
+      "role": "assistant",
+      "content": "感谢您提供用户ID。我可以看到您有几项预订，但在您的预订列表中没有找到专门从纽约到芝加哥的预订。我在您的预订中找到的机场有：\n\n- UM3OG5: 西雅图到达拉斯/沃斯堡\n- 5RJ7UH: 洛杉矶到旧金山  \n- FQ8APE: 纽瓦克到芝加哥(ORD) - 这可能是您指的那个\n- QKRY03: 奥兰多到底特律\n\n您能确认预订FQ8APE（纽瓦克到芝加哥）是否是您想要修改的那个吗？如果是的话，请告诉我您想对这项预订进行哪些具体更改。",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 16,
+      "role": "user",
+      "content": "是的，FQ8APE（纽瓦克到芝加哥）就是我想修改的预订。我想将乘客更改为本人，升级到 economy 舱，并请添加 3 件托运行李。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 17,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_flight_status({\"flight_number\": \"HAT056\", \"date\": \"2024-05-25\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 18,
+      "role": "tool",
+      "content": "available",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 19,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_flight_status({\"flight_number\": \"HAT138\", \"date\": \"2024-05-25\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 20,
+      "role": "tool",
+      "content": "available",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 21,
+      "role": "assistant",
+      "content": "我可以帮您修改从纽瓦克到芝加哥的预订 FQ8APE。让我确认您要求的更改：\n\n1. 将乘客从 Ivan Garcia 更改为您本人（Omar Rossi）\n2. 将舱位从 basic economy 升级到 economy 舱\n3. 添加 3 件托运行李\n\n但是，我需要告知您一些重要的政策限制：\n\n- **basic economy 航班无法修改** - 由于这是 basic economy 预订，根据我们的政策，我们无法修改航班或舱位等级。basic economy 机票不可更改。\n\n- **乘客更改**：虽然我们可以修改乘客信息，但无法更改乘客人数。由于当前预订有 1 名乘客，我们只能更新乘客详情，无法添加额外乘客。\n\n由于这是 basic economy 预订，我们唯一能做的修改是更新乘客信息。您希望我只更新乘客详情为您的信息，还是您更愿意取消此预订并预订一张新的 economy 舱机票以满足您的需求？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 22,
+      "role": "user",
+      "content": "如果无法升级到经济舱或包含3件托运行李，我就保持原样。谢谢您的帮助。###STOP###",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    }
+  ],
+  "metadata": {
+    "dataset": "tau2bench",
+    "task_id": "airline_failed_deepseek-reasoner::cf2f88a1-8afd-4564-b6a5-1bb9266c24c0",
+    "task_description": "场景：航空\n用户目的：对于您即将从纽约到芝加哥的行程，您希望将乘客更改为您本人，升级到 economy class，并托运3件行李。",
+    "reward": 0,
+    "annotation": {
+      "critical_error_step": 21,
+      "critical_error_type": "reason.InvalidInference"
+    },
+    "extra": {
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
+    }
+  }
+}

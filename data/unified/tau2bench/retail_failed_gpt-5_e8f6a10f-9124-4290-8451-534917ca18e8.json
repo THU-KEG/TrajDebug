@@ -1,0 +1,185 @@
+{
+  "messages": [
+    {
+      "step": 0,
+      "role": "system",
+      "content": "# 零售代理政策\n\n作为一名零售代理，你可以帮助用户：\n\n- **取消或修改待处理订单**\n- **退回或更换已交付订单**\n- **修改其默认用户地址**\n- **提供关于其个人资料、订单及相关产品的信息**\n\n在对话开始时，你必须通过电子邮件查找用户ID，或通过姓名 + 邮政编码来验证用户身份。即使用户已经提供了用户ID，也必须执行此操作。\n\n一旦用户通过验证，你可以为用户提供关于订单、产品、个人资料的信息，例如帮助用户查询订单ID。\n\n每次对话中你只能帮助一个用户（但可以处理同一用户的多个请求），并且必须拒绝与任何其他用户相关的任务请求。\n\n在执行任何更新数据库的操作（取消、修改、退货、换货）之前，你必须列出操作细节，并获得用户明确确认（yes）后才能继续。\n\n你不应编造用户或工具未提供的任何信息、知识或流程，也不应提供主观建议或评论。\n\n你每次最多只能调用一个工具；如果你调用了工具，就不应同时向用户回复；如果你向用户回复，就不应同时调用工具。\n\n你应拒绝违反本政策的用户请求。\n\n只有当请求无法在你的操作范围内处理时，才应将用户转接给人工客服。转接时，首先调用工具 transfer_to_human_agents，然后向用户发送消息：“YOU ARE BEING TRANSFERRED TO A HUMAN AGENT. PLEASE HOLD ON.”\n\n## 基本领域说明\n\n- 数据库中的所有时间均为 EST（美国东部时间）且使用24小时制。例如，“02:30:00”表示东部时间凌晨2点30分。\n\n### 用户\n\n每个用户都有一个包含以下内容的个人资料：\n\n- 唯一用户ID\n- 电子邮件\n- 默认地址\n- 支付方式\n\n共有三种支付方式：**礼品卡**、**PayPal账户**、**信用卡**。\n\n### 产品\n\n我们的零售商店有50种产品类型。\n\n对于每一种**产品类型**，都有不同**选项**的**变体商品**。\n\n例如，对于“T恤”产品，可能有“蓝色 M码”的变体商品，也可能有“红色 L码”的变体商品。\n\n每个产品具有以下属性：\n\n- 唯一产品ID\n- 名称\n- 变体列表\n\n每个变体商品具有以下属性：\n\n- 唯一商品ID\n- 该商品选项值的信息\n- 库存情况\n- 价格\n\n注意：产品ID和商品ID没有关联，不应混淆！\n\n### 订单\n\n每个订单具有以下属性：\n\n- 唯一订单ID\n- 用户ID\n- 地址\n- 已订购的商品\n- 状态\n- 履约信息（追踪ID和商品ID）\n- 支付历史\n\n订单状态可以是：**待处理（pending）**、**已处理（processed）**、**已交付（delivered）**或**已取消（cancelled）**。\n\n订单还可以根据已执行的操作具有其他可选属性（例如取消原因、更换的商品、差价等）。\n\n## 通用操作规则\n\n通常，你只能对“待处理”或“已交付”的订单执行操作。\n\n更换或修改订单的工具每个订单只能调用一次！在调用工具之前，务必将所有需要更改的商品整理成列表。\n\n## 取消待处理订单\n\n只有当订单状态为“待处理”时才能取消订单，在执行操作前应检查其状态。\n\n用户需要确认订单ID以及取消原因（仅限“no longer needed（不再需要）”或“ordered by mistake（误下单）”）。其他原因不被接受。\n\n在用户确认后，订单状态将变为“已取消”，如果原支付方式为礼品卡，则立即退款；否则将在5至7个工作日内退款。\n\n## 修改待处理订单\n\n只有当订单状态为“待处理”时才能修改订单，在执行操作前应检查其状态。\n\n对于待处理订单，你可以修改收货地址、支付方式或商品选项，但不能修改其他内容。\n\n### 修改支付方式\n\n用户只能选择一种不同于原支付方式的单一支付方式。\n\n如果用户希望改为使用礼品卡，则礼品卡余额必须足以覆盖总金额。\n\n在用户确认后，订单状态仍保持为“待处理”。如果原支付方式为礼品卡，则立即退款；否则将在5至7个工作日内退款。\n\n### 修改商品\n\n此操作每个订单只能调用一次，并将订单状态更改为“待处理（商品已修改）”。之后将无法再次修改或取消订单。因此在执行此操作前必须确认所有细节正确无误，尤其要提醒客户确认是否已提供所有需要修改的商品。\n\n对于待处理订单，每个商品只能修改为同一产品的其他可用选项变体，不能更换产品类型（例如不能将衬衫改为鞋子）。\n\n用户必须提供一种支付方式用于支付或接收差价。如果提供礼品卡，则其余额必须足以覆盖差价。\n\n## 退回已交付订单\n\n只有当订单状态为“已交付”时才能退货，在执行操作前应检查其状态。\n\n用户需要确认订单ID以及要退回的商品列表。\n\n用户需要提供一种支付方式用于接收退款。\n\n退款必须退回原支付方式，或退回到已有的礼品卡。\n\n在用户确认后，订单状态将变为“退货请求已提交”，用户将收到一封关于如何退回商品的电子邮件。\n\n## 更换已交付订单\n\n只有当订单状态为“已交付”时才能更换商品，在执行操作前应检查其状态。特别需要提醒客户确认是否已提供所有需要更换的商品。\n\n对于已交付订单，每个商品只能更换为同一产品的其他可用选项变体，不能更换产品类型（例如不能将衬衫改为鞋子）。\n\n用户必须提供一种支付方式用于支付或接收差价。如果提供礼品卡，则其余额必须足以覆盖差价。\n\n在用户确认后，订单状态将变为“换货请求已提交”，用户将收到一封关于如何退回商品的电子邮件。无需重新下单。",
+      "name": "system",
+      "judgable": false,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 1,
+      "role": "assistant",
+      "content": "你好！今天有什么可以帮您的吗？",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 2,
+      "role": "user",
+      "content": "嘿！好吧，宇宙总喜欢搞点事情，不是吗？我本来有个宏伟计划：在我父母位于西雅图的家里布置一个舒适的家庭办公室，然后，你懂的，穿着登山靴掌握开Zoom会议的艺术。所以，我一时兴起订购了一些家庭办公用品和一些登山装备，感觉自己充满了冒险精神。\n\n但是——剧情反转！我们公司刚刚决定让所有人回纽约办公室上班。天哪！有没有什么办法可以只退掉家庭办公用品，保留那些登山装备？如果可以的话，退款会退回我的原支付方式吗？请告诉我你需要我提供什么信息（我一想到人体工学椅就紧张，往往会忘记自己订了什么东西，哈哈）。",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 3,
+      "role": "assistant",
+      "content": "{\n  \"message\": \"是的——您可以只退回家庭办公用品，保留徒步装备。退货退款可以退回原支付方式，或退至您账户中的现有礼品卡。\\n\\n首先，我需要验证您的账户并找到订单：\\n1) 请提供您购买时使用的邮箱。如果您不记得，请提供您的姓名和邮政编码。\\n2) 如果您知道包含家庭办公用品的订单ID，请提供。如果不知道，我可以在验证您的账户后调取您最近的订单。\\n3) 确认订单已 delivered（仅已 delivered 的订单可申请退货）。\\n4) 告诉我您想退回该订单中的哪些具体商品（如果没有商品ID，简要描述即可）。\\n5) 确认退款去向：退回订单使用的原支付方式，或退至您账户中的现有礼品卡。\\n\\n收到这些信息后，我会核实订单状态，列出待退回的商品，并在提交退货申请前请求您的最终确认。您会立即收到一封包含退货说明的电子邮件。\"\n}",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 4,
+      "role": "user",
+      "content": "好的，谢谢你帮我详细解释！我没有电子邮箱（别评判我，焦虑让我没法坚持使用），但我叫Noah Patel，我在NYC驻守——邮编10108。\n\n至于配送，我觉得订单还没到。如果我没记错的话，我为家庭办公室订了三样东西：可能是一把可以转的椅子，一张桌子（这样我的笔记本就不会在我腿上睡觉了），还有一盏灯？但不太确定具体细节。\n\n我肯定想把退款退回到原来的支付方式，因为我的礼品卡只是放在袜子抽屉里的随机代码。目前这些信息够了吗，还是你需要更多细节来深入处理？",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 5,
+      "role": "assistant",
+      "content": "[tool_calls]\n- find_user_id_by_name_zip({\"first_name\": \"Noah\", \"last_name\": \"Patel\", \"zip\": \"10108\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 6,
+      "role": "tool",
+      "content": "noah_patel_6952",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 7,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_user_details({\"user_id\": \"noah_patel_6952\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 8,
+      "role": "tool",
+      "content": "{\"user_id\": \"noah_patel_6952\", \"name\": {\"first_name\": \"Noah\", \"last_name\": \"Patel\"}, \"address\": {\"address1\": \"224 Elm Street\", \"address2\": \"Suite 491\", \"city\": \"New York\", \"country\": \"USA\", \"state\": \"NY\", \"zip\": \"10108\"}, \"email\": \"noah.patel1792@example.com\", \"payment_methods\": {\"paypal_3169710\": {\"source\": \"paypal\", \"id\": \"paypal_3169710\"}}, \"orders\": [\"#W1845024\", \"#W7043598\", \"#W6111398\"]}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 9,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_order_details({\"order_id\": \"#W1845024\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 10,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W1845024\", \"user_id\": \"noah_patel_6952\", \"address\": {\"address1\": \"517 Lakeview Drive\", \"address2\": \"Suite 183\", \"city\": \"Seattle\", \"country\": \"USA\", \"state\": \"WA\", \"zip\": \"98195\"}, \"items\": [{\"name\": \"Mechanical Keyboard\", \"product_id\": \"1656367028\", \"item_id\": \"1340995114\", \"price\": 235.13, \"options\": {\"switch type\": \"tactile\", \"backlight\": \"none\", \"size\": \"full size\"}}, {\"name\": \"Cycling Helmet\", \"product_id\": \"7765186836\", \"item_id\": \"3358616356\", \"price\": 197.33, \"options\": {\"size\": \"S\", \"color\": \"red\", \"ventilation\": \"low\"}}, {\"name\": \"Headphones\", \"product_id\": \"6992792935\", \"item_id\": \"7493556126\", \"price\": 346.97, \"options\": {\"type\": \"over-ear\", \"connectivity\": \"wireless\", \"color\": \"black\"}}, {\"name\": \"Office Chair\", \"product_id\": \"4794339885\", \"item_id\": \"8323284863\", \"price\": 511.24, \"options\": {\"material\": \"fabric\", \"color\": \"blue\", \"armrest\": \"adjustable\", \"backrest height\": \"standard\"}}, {\"name\": \"Hiking Boots\", \"product_id\": \"7363354090\", \"item_id\": \"8277474082\", \"price\": 236.57, \"options\": {\"size\": \"12\", \"material\": \"leather\", \"waterproof\": \"yes\"}}], \"status\": \"pending\", \"fulfillments\": [], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 1527.24, \"payment_method_id\": \"paypal_3169710\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 11,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_order_details({\"order_id\": \"#W7043598\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 12,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W7043598\", \"user_id\": \"noah_patel_6952\", \"address\": {\"address1\": \"224 Elm Street\", \"address2\": \"Suite 491\", \"city\": \"New York\", \"country\": \"USA\", \"state\": \"NY\", \"zip\": \"10108\"}, \"items\": [{\"name\": \"E-Reader\", \"product_id\": \"3801771308\", \"item_id\": \"9494281769\", \"price\": 252.06, \"options\": {\"screen size\": \"8-inch\", \"connectivity\": \"Wi-Fi\", \"storage\": \"8GB\"}}, {\"name\": \"Sneakers\", \"product_id\": \"7471004230\", \"item_id\": \"6477915553\", \"price\": 186.45, \"options\": {\"size\": \"6\", \"color\": \"black\", \"material\": \"synthetic\"}}, {\"name\": \"Espresso Machine\", \"product_id\": \"4354588079\", \"item_id\": \"5839483328\", \"price\": 2929.06, \"options\": {\"pressure\": \"15 bar\", \"capacity\": \"2L\", \"type\": \"automatic\"}}, {\"name\": \"T-Shirt\", \"product_id\": \"9523456873\", \"item_id\": \"1176194968\", \"price\": 52.88, \"options\": {\"color\": \"black\", \"size\": \"S\", \"material\": \"polyester\", \"style\": \"crew neck\"}}], \"status\": \"cancelled\", \"fulfillments\": [{\"tracking_id\": [\"235464230524\"], \"item_ids\": [\"9494281769\", \"6477915553\", \"5839483328\", \"1176194968\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 3420.45, \"payment_method_id\": \"paypal_3169710\"}, {\"transaction_type\": \"refund\", \"amount\": 3420.45, \"payment_method_id\": \"paypal_3169710\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 13,
+      "role": "assistant",
+      "content": "[tool_calls]\n- get_order_details({\"order_id\": \"#W6111398\"})",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 14,
+      "role": "tool",
+      "content": "{\"order_id\": \"#W6111398\", \"user_id\": \"noah_patel_6952\", \"address\": {\"address1\": \"224 Elm Street\", \"address2\": \"Suite 491\", \"city\": \"New York\", \"country\": \"USA\", \"state\": \"NY\", \"zip\": \"10108\"}, \"items\": [{\"name\": \"Skateboard\", \"product_id\": \"1968349452\", \"item_id\": \"4293355847\", \"price\": 200.8, \"options\": {\"deck material\": \"bamboo\", \"length\": \"31 inch\", \"design\": \"plain\"}}, {\"name\": \"T-Shirt\", \"product_id\": \"9523456873\", \"item_id\": \"9647292434\", \"price\": 53.48, \"options\": {\"color\": \"purple\", \"size\": \"S\", \"material\": \"polyester\", \"style\": \"v-neck\"}}, {\"name\": \"Skateboard\", \"product_id\": \"1968349452\", \"item_id\": \"4545791457\", \"price\": 186.06, \"options\": {\"deck material\": \"plastic\", \"length\": \"28 inch\", \"design\": \"plain\"}}, {\"name\": \"Headphones\", \"product_id\": \"6992792935\", \"item_id\": \"3104857380\", \"price\": 377.97, \"options\": {\"type\": \"on-ear\", \"connectivity\": \"wireless\", \"color\": \"red\"}}], \"status\": \"cancelled\", \"fulfillments\": [{\"tracking_id\": [\"799127560400\"], \"item_ids\": [\"4293355847\", \"9647292434\", \"4545791457\", \"3104857380\"]}], \"payment_history\": [{\"transaction_type\": \"payment\", \"amount\": 818.31, \"payment_method_id\": \"paypal_3169710\"}, {\"transaction_type\": \"refund\", \"amount\": 818.31, \"payment_method_id\": \"paypal_3169710\"}], \"cancel_reason\": null, \"exchange_items\": null, \"exchange_new_items\": null, \"exchange_payment_method_id\": null, \"exchange_price_difference\": null, \"return_items\": null, \"return_payment_method_id\": null}",
+      "name": "tool",
+      "judgable": false,
+      "compress_role": "compress"
+    },
+    {
+      "step": 15,
+      "role": "assistant",
+      "content": "{\n  \"message\": \"谢谢，Noah。我已验证您的账户并找到了您发往西雅图的未结订单 #W1845024。其状态为 pending（尚未送达），因此我现在无法发起退货——只有在送达后才能办理退货。\\n\\n好消息是：一旦送达，您只需退回“home office”用品，而可以保留登山装备。根据您的偏好，退款可以退回至您原来的支付方式（您存档的 PayPal）。\\n\\n我在该订单中看到看起来像“home office”用品的有：\\n- Office Chair（item id 8323284863）\\n- Mechanical Keyboard（item id 1340995114）\\n- Headphones（item id 7493556126）\\n该订单中的登山装备：\\n- Hiking Boots（item id 8277474082）\\n\\n下一步——请确认：\\n1) 订单送达后，您想退回的是这三件商品吗？\\n2) 您希望将退款退回到原来的支付方式（PayPal），如您所述？\\n\\n替代方案（如果您不想等待）：我们现在可以取消整个订单，但这也会取消登山靴。之后您需要为靴子重新下单。如果您选择此项，请确认取消原因（“no longer needed”或“ordered by mistake”）。\\n\\n如果您愿意，我还可以在此 pending 订单发货前更改配送地址。\\n\\n请告诉我您希望如何处理，我将为您办理。\"\n}",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 16,
+      "role": "user",
+      "content": "感谢你挖出我的订单，你这个网络神探！确认一下，是的，那三样——办公椅、机械键盘和耳机——就是我说的“家庭办公装备”。不得不说，耳机对于屏蔽吵闹的邻居至关重要，但我想暂时只能凑合听纽约交响乐队的演奏了。\n\n我们按计划来吧：我想保留那双登山靴（因为我的冒险精神超过了我的方向感），而且我很希望订单送达后，退款能直接退回到我的PayPal账户。\n\n至于更改收货地址——目前没必要，因为听起来到货后我直接办理部分退货就行。当然，除非我们公司再搞出什么幺蛾子！\n\n所以，我会像一位真正耐心的英雄一样等到送达，然后启动椅子、键盘和耳机的退货流程。这期间我需要注意些什么吗？",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 17,
+      "role": "assistant",
+      "content": "{\n  \"message\": \"明白了—计划已确认。我们会等到订单 #W1845024 送达，然后为这三件家庭办公用品提交退货，退款将退回到您的原始付款方式（您的 PayPal）：\\n- 办公椅 — item id 8323284863\\n- 机械键盘 — item id 1340995114\\n- 耳机 — item id 7493556126\\n\\n有一个小问题需要确认，以便我们在送达后一次性处理所有事情：您想怎么处理骑行头盔（item id 3358616356）？是保留它，还是将其包含在退货中？\\n\\n在此期间需要注意的事项：\\n- 配送状态：一旦显示为 delivered，请在这里通知我，我会立即提交退货申请。\\n- 如果在送达前您的计划有变（例如，您决定取消整个订单或修改地址/付款方式），请立即告诉我—这些操作只有在订单仍处于 pending 状态时才可以进行。\\n\\n送达后，您只需给我发送：“是的，退回椅子（8323284863）、键盘（1340995114）和耳机（7493556126）；退款到我的 PayPal。” 我会确认详情并提交退货。然后您会收到一封电子邮件，其中包含如何以及在哪里退回商品的说明。\"\n}",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 18,
+      "role": "user",
+      "content": "哦，那个\"臭名昭著\"的骑行头盔——我差点忘了！想必我的大脑正忙着策划史诗级的办公椅旋转呢。我肯定会留着这个头盔。它基本上就是我的安全毯，用来假装我会认真开始骑行，而不是仅仅为了在公寓里戴着好玩。\n\n所以，一旦包裹送达，我就联系你们启动椅子、键盘和耳机的退货流程，退款会退回到我的PayPal。我会密切关注物流更新（也许也会关注那个头盔，好让它在纽约的街头试试身手）。\n\n目前就这些了——谢谢你帮我避免陷入混乱！",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    },
+    {
+      "step": 19,
+      "role": "assistant",
+      "content": "{\n  \"message\": \"好的—保留骑行头盔，一旦订单 #W1845024 delivered，我们将退回以下三件商品并退款至您原来的 PayPal：\\n- 办公椅 (8323284863)\\n- 机械键盘 (1340995114)\\n- 耳机 (7493556126)\\n\\n订单 delivered 后，只需发送：“是的，退回 8323284863、1340995114、7493556126；退款至我的 PayPal。”我会确认并提交退货申请，您将收到一封包含操作说明的电子邮件。\\n\\n提醒：只能在送达后发起退货。如果在发货前您改变主意，我仍可取消整个订单，或在订单 pending 状态下修改地址/支付方式。除此之外，一切已安排妥当—商品到达后联系我就行。\"\n}",
+      "name": "assistant",
+      "judgable": true,
+      "compress_role": "preserve"
+    },
+    {
+      "step": 20,
+      "role": "user",
+      "content": "太棒了，这些都很清楚！我会留意快递送达，保留那个头盔，收到三件家庭办公用品后开始办理退货。感谢您让这种\"WFH但又不是WFH\"的情况变得轻松了许多！\n\n###STOP###",
+      "name": "user",
+      "judgable": false,
+      "compress_role": "default"
+    }
+  ],
+  "metadata": {
+    "dataset": "tau2bench",
+    "task_id": "retail_failed_gpt-5::e8f6a10f-9124-4290-8451-534917ca18e8",
+    "task_description": "场景：零售\n用户目的：你之前处于居家办公状态，订购了三件办公用品以及一些徒步用品，这样你就可以回到你父母在西雅图的住处远程办公并享受户外生活。但你的公司刚刚宣布你很快就要回办公室上班了。如果客服人员可以取消部分商品，你想退掉办公用品（你忘了具体是什么），保留徒步用品。你想知道能退回多少钱，并且希望退款能原路返回到你的原支付方式。如果无法取消部分商品，那就把地址改成你在纽约的住处，之后你会自己退货。",
+    "reward": 0,
+    "annotation": {
+      "critical_error_step": 15,
+      "critical_error_type": "plan.BadDecomposition"
+    },
+    "extra": {
+      "agent_framework_description": "A user interacts with a single `assistant` that must follow the scene policy shown in the leading `system` message while executing the user's request. `tool` messages are tool-call return values. Critical errors can only be attributed to an `assistant` step; `user` and `tool` steps are never the critical step. The assistant should try to fulfil the user's request as much as possible, but the user may make unreasonable or out-of-policy requests; whenever the user's request conflicts with the `system` policy, the `system` policy takes precedence and the assistant must refuse or redirect rather than comply.\n\nDATASET NOTES (tau²-bench). The leading `system` message lists binding procedural rules using \"必须\" / \"must\" / \"before X you must Y\" / \"only ... if\" / \"never\". These rules are hard constraints on every assistant step that touches the database (booking, modifying, cancelling, refunding, returning) — typical examples include verifying user identity (email lookup, name+zip) before any account-data operation. When the user refers to a target object indirectly (\"my recent order\", \"the items I want to cancel\") and the prior `tool` outputs visibly enumerate multiple candidate objects under that user (multiple `orders`, multiple `reservations`, multiple membership tiers), the candidate set is fully visible — picking one to act on is a substantive commitment, not a probe; the tool response for that one candidate yields no information about the others, so it is not self-correcting on the next turn. The system policy also constrains the option space the assistant may offer the user (e.g. cancellation may be whole-order-only; modification may be limited to same-product-type variants). When the assistant presents a procedural option to the user (\"you can return only this item\", \"you can wait until delivery and then return\", \"I can split the cancellation\"), that option must be authorised either by the system policy verbatim or by a prior tool result for the specific object — even if the assistant is only presenting choices and not yet executing, presenting an option the assistant has not verified to be permitted commits the assistant to a path that may be unworkable, and the user may rely on the option as if it were available."
+    }
+  }
+}
